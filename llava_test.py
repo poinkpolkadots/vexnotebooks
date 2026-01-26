@@ -3,16 +3,34 @@ import time
 
 start_time = time.time()
 
-response = ollama.chat(
-    model="llava",
-    messages=[
-        {"role": "user", "content": "5 questions for vex robotics judge to ask about engineering notebooks"}
-    ],
-    stream=True
+# response = ollama.chat(
+#     model="llava",
+#     messages=[
+#         {"role": "user", "content": "5 questions for vex robotics judge to ask about engineering notebooks"}
+#     ],
+#     stream=True
+# )
+#
+# for chunk in response:
+#     print(chunk["message"]["content"], end="", flush=True)
+
+modelfile = """
+FROM llava
+# system temperature, higher is more creative
+PARAMETER temperature 1
+
+# Set system prompt
+SYSTEM You are acting as an assistant to VEX Robotics Judges. You will generate resources for them to help them in grading engineering notebooks. Write in a way such that a highschooler would understand what you are saying.
+"""
+
+ollama.create(model="llava_judge", modelfile=modelfile)
+
+response = ollama.generate(
+    model="llava_judge",
+    prompt="5 questions for vex robotics judge to ask about engineering notebooks"
 )
 
-for chunk in response:
-    print(chunk["message"]["content"], end="", flush=True)
+print(response["response"])
 
 print("\n")
 

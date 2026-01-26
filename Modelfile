@@ -1,7 +1,7 @@
 FROM llama3.2:1b
 
 # system temperature, higher is more creative
-PARAMETER temperature 0.5
+PARAMETER temperature 1
 
 # Set system prompt
 SYSTEM """
