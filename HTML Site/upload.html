@@ -3,50 +3,23 @@
     <head>
         <title>Upload Notebook</title>
         <link rel="icon" type="image/x-icon" href="favicon.png">
+        <link rel="stylesheet" href="styles.css">
     </head>
-
     <body>
         <div class="topnav">
-            <br>
             <a class="inactive" href="basicvex.html">Home</a>
             <a class="active" href="upload.html">Upload</a>
             <a class="inactive" href="catalog.html">Catalog</a>
-            <br><br>
         </div>
-        <style>
-            body {
-                margin: 0;
-                font-family: Verdana, Geneva, Tahoma, sans-serif;
-            }
-            .topnav {
-                background-color: brown;
-                overflow: hidden;
-                text-decoration: none;
-                padding: 10px 20px;
-            }
-            .topnav a.active {
-                background-color: white;
-                color: black;
-                text-decoration: none;
-                padding: 10px 20px;
-                border-radius: 5px;
-                font-size: larger;
-            }
-            .topnav a.inactive {
-                color: white;
-                text-decoration: none;
-                padding: 0px 30px 0px;
-                font-size:larger;
-            }
-        </style>
-        <h2>Upload Engineering Notebook</h2>
-        <p>Also a work in progress because it needs to take MULTIPLE pdfs at once and we need a status bar later</p>
-        <input type="file" id="fileInput" accept="application/pdf">
-
-        <br><br>
-
-        <iframe id="pdfPreview" width="600" height="800"></iframe>
-
+        <main>
+            <h2>Upload Engineering Notebook</h2>
+            <p>Also a work in progress because it needs to take MULTIPLE pdfs at once and we need a status bar later</p>
+            <input type="file" id="fileInput" accept="application/pdf">
+            <br><br>
+            <div id="pdfPreviewContainer">
+                <iframe id="pdfPreview" width="600" height="800"></iframe>
+            </div>
+        </main>
         <script>
             const input = document.getElementById("fileInput")
             const preview = document.getElementById("pdfPreview")
