@@ -7,7 +7,7 @@ start = datetime.now()
 url = "http://localhost:11434/api/generate"
 
 payload = {
-    "model": "notebook-judge",
+    "model": "notebook-judge-1b",
     "prompt": "write 5 questions for a vex robotics judge to ask a student about their engineering journal. print only the questions, in a numbered list.",
 }
 
