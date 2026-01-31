@@ -27,4 +27,5 @@ if response.status_code == 200:
 else:
     print("Error:", response.status_code, response.text)
 
-print("\n" + "Runtime: " + datetime.now() - start)
+print("\n" + "Runtime:")
+print(datetime.now() - start)
