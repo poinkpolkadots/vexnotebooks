@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="../css/styles.css">
     </head>
     <body>
+        <img class="logo" src="../assets/favicon.png" alt="VEX Robotics Logo">
         <div class="topnav">
             <a class="inactive" href="basicvex.html">Home</a>
             <a class="active" href="upload.html">Upload</a>
@@ -28,7 +29,8 @@
             <script>
             let pdfFiles = [];
             let currentPdfIndex = 0;
-
+            
+            // handle PDF file selection
             document.getElementById('pdfInput').addEventListener('change', function(e) {
                 pdfFiles = Array.from(e.target.files);
                 currentPdfIndex = 0;
@@ -41,18 +43,21 @@
                 }
             });
 
+            // view previous PDF
             document.getElementById('prevPdfBtn').onclick = function() {
                 if (pdfFiles.length === 0) return;
                 currentPdfIndex = (currentPdfIndex - 1 + pdfFiles.length) % pdfFiles.length;
                 showPdf(currentPdfIndex);
             };
 
+            // view next PDF
             document.getElementById('nextPdfBtn').onclick = function() {
                 if (pdfFiles.length === 0) return;
                 currentPdfIndex = (currentPdfIndex + 1) % pdfFiles.length;
                 showPdf(currentPdfIndex);
             };
 
+            // function to display the selected PDF
             function showPdf(index) {
                 const file = pdfFiles[index];
                 const url = URL.createObjectURL(file);
