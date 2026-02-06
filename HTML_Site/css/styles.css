@@ -36,6 +36,8 @@ button {
     overflow: hidden;
     text-decoration: none;
     padding: 20px;
+    display: flex;
+    justify-content: center;
 }
 
 .topnav * {
@@ -67,4 +69,12 @@ button {
 #pdfPreviewContainer {
     display: flex;
     justify-content: center;
+}
+
+.logo{
+    height: 75px;
+    width: 75px;
+    position: absolute;
+    left: 5px;
+    top: 5px;
 }
