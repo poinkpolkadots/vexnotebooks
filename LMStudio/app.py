@@ -40,21 +40,31 @@ def pdf_to_text(path): #convert PDF to text
     return text #return the extracted text
 
 def summarize_image_pdf_pages(pdf_path): #main function to summarize each page of a PDF given the path to the PDF
-    intepret = lms.llm("qwen2.5-vl-3b-instruct") #model for interpreting images
+    intepret = lms.llm("zai-org/glm-4.6v-flash") #model for interpreting images
     page_summaries = [] #list to hold summaries of each page
     for i, path in enumerate(pdf_to_images(pdf_path)): #iterate through each page image in the pdf
         pagechat = lms.Chat.from_history({"messages": [ #TODO: figure out system and user prompts
             { "role": "system", "content": (
-                ""
-            )}, { "role": "user", "content": "", "images": [lms.prepare_image(path)]}
+                "You are a VEX Robotics Judge's Assistant. Your task is to extract evidence from notebook pages based on the 2025 REC Foundation Rubric."
+                "Focus your analysis on these specific Rubric Criteria:"
+                "Design Process Cycles: Identify where the team defines a goal, brainstorms, builds, and programs. Look for citations of outside sources."
+                "Testing & Iteration: Find records of 'Testing and Refinement'—specifically how they used data/observations to improve the design."
+                "Project Management: Note team meeting goals, specific task assignments to students, and resource constraints (time/materials)."
+                "Professionalism: Check if entries are in sequence, dated, and signed by contributing students."
+            )}, { "role": "user", "content": (
+                "Extract all evidence on this page that relates to the Engineering Notebook Rubric criteria."
+            ), "images": [lms.prepare_image(path)]}
         ]})
 
-        res = intepret.respond(pagechat, config={ "temperature": 0.1 }) #get summary for each page without any DREAMING
+        res = intepret.respond(pagechat, config={ "temperature": 0.1 }).content #get summary for each page without any DREAMING
         page_summaries.append(res) #add summary to list
+        print(res) #TODO: THIS IS DEBUG, REMOVE LATER
     
     return page_summaries #return list of page summaries
 
-print(pdf_to_text("C:/Users/lawre/OneDrive/Documents/vex/vexnotebooks/HTML_Site/pdfs/Sample2-Engineering-notebook.pdf")) #test pdf to text function
+summarize_image_pdf_pages("C:/Users/lawre/OneDrive/Documents/vex/vexnotebooks/HTML_Site/pdfs/Sample2-Engineering-notebook.pdf")
+
+#print(pdf_to_text("C:/Users/lawre/OneDrive/Documents/vex/vexnotebooks/HTML_Site/pdfs/Sample2-Engineering-notebook.pdf")) #test pdf to text function
 
 #TODO: do something with this (supposed to print the result of the main chat once I feed it the page summaries)
 #for fragment in model.respond_stream(chat):
