@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="../css/styles.css">
     </head>
     <body>
+        <img class="logo" src="../assets/favicon.png" alt="VEX Robotics Logo">
         <div class="topnav">
             <a class="inactive" href="basicvex.html">Home</a>
             <a class="active" href="upload.html">Upload</a>
@@ -13,12 +14,57 @@
         </div>
         <main>
             <h2>Upload Engineering Notebook</h2>
-            <p>Also a work in progress because it needs to take MULTIPLE pdfs at once and we need a status bar later</p>
-            <input type="file" id="fileInput" accept="application/pdf">
-            <br><br>
-            <div id="pdfPreviewContainer">
-                <iframe id="pdfPreview" width="600" height="800"></iframe>
+            <div id="pdf-upload-section">
+                <input type="file" id="pdfInput" accept="application/pdf" multiple>
+                <div id="pdf-viewer-controls" style="display:none;">
+                    <button id="prevPdfBtn">&larr;</button>
+                    <span id="pdfCounter"></span>
+                    <button id="nextPdfBtn">&rarr;</button>
+                </div>
+                <div id="pdfDisplay" style="margin-top:10px;">
+                    <!-- PDF preview will be shown here -->
+                </div>
             </div>
+
+            <script>
+            let pdfFiles = [];
+            let currentPdfIndex = 0;
+            
+            // handle PDF file selection
+            document.getElementById('pdfInput').addEventListener('change', function(e) {
+                pdfFiles = Array.from(e.target.files);
+                currentPdfIndex = 0;
+                if (pdfFiles.length > 0) {
+                    document.getElementById('pdf-viewer-controls').style.display = 'inline-block';
+                    showPdf(currentPdfIndex);
+                } else {
+                    document.getElementById('pdfDisplay').innerHTML = '';
+                    document.getElementById('pdf-viewer-controls').style.display = 'none';
+                }
+            });
+
+            // view previous PDF
+            document.getElementById('prevPdfBtn').onclick = function() {
+                if (pdfFiles.length === 0) return;
+                currentPdfIndex = (currentPdfIndex - 1 + pdfFiles.length) % pdfFiles.length;
+                showPdf(currentPdfIndex);
+            };
+
+            // view next PDF
+            document.getElementById('nextPdfBtn').onclick = function() {
+                if (pdfFiles.length === 0) return;
+                currentPdfIndex = (currentPdfIndex + 1) % pdfFiles.length;
+                showPdf(currentPdfIndex);
+            };
+
+            // function to display the selected PDF
+            function showPdf(index) {
+                const file = pdfFiles[index];
+                const url = URL.createObjectURL(file);
+                document.getElementById('pdfDisplay').innerHTML = `<embed src="${url}" type="application/pdf" width="500" height="600">`;
+                document.getElementById('pdfCounter').textContent = `PDF ${index + 1} of ${pdfFiles.length}`;
+            }
+            </script>
         </main>
         <script>
             const input = document.getElementById("fileInput")
