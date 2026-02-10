@@ -19,6 +19,5 @@ cur.execute("CREATE TABLE notebooks (id INTEGER GENERATED ALWAYS AS IDENTITY PRI
                                 )
 
 conn.commit()
-
 cur.close()
 conn.close()
