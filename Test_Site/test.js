@@ -1,4 +1,3 @@
-const path = require('path');
 let formidable = require('formidable');
 
 let http = require('http');
