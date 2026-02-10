@@ -13,8 +13,9 @@ cur = conn.cursor()
 cur.execute("DROP TABLE IF EXISTS notebooks;")
 cur.execute("CREATE TABLE notebooks (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,"
             "path TEXT NOT NULL,"
-            "output LONGTEXT,"
-            "date DATE DEFAULT CURRENT_DATE NOT NULL);"
+            "name TEXT NOT NULL,"
+            "date DATE DEFAULT CURRENT_DATE NOT NULL),"
+            "output LONGTEXT;"
                                 )
 
 conn.commit()
