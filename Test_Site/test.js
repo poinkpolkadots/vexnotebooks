@@ -1,6 +1,9 @@
 let formidable = require('formidable');
+import { fileURLToPath } from 'url';
 
 let http = require('http');
+
+const __filename = fileURLToPath(import.meta.url);
 
 http.createServer(function (req, res) {
   res.writeHead(200, {'Content-Type': 'text/html'});
@@ -10,9 +13,6 @@ http.createServer(function (req, res) {
   res.write('</form>');
   return res.end();
 }).listen(8080);
-
-let http = require('http');
-let formidable = require('formidable');
 
 http.createServer(function (req, res) {
   if (req.url == '/fileupload') {
