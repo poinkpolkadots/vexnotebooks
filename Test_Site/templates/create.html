@@ -4,22 +4,10 @@
 {% block content %}
     <h1>Leave a Review</h1>
     <form method="post">
-        <label for="title">Title</label>
-        <input type="text" name="title" placeholder="Book Title"></input>
-        <br><br><br>
-        <label for="author">Author</label>
-        <input type="text" name="author" placeholder="Author" value="jflkdsjflkdsj"></input>
-        <br><br><br>
-        <label for="pages">Pages</label>
-        <input type="number" name="pages"></input>
-        <br>
-        <label for="review">Review</label>
-        <br>
-        <textarea name="review" placeholder="Review" rows="15" cols="60"></textarea>
-        <br>
-        <label for="date">Date</label>
-        <input type="date" name="date"></input>
-        <br>
-        <button type="submit">Submit</button>
+        <label for="upload">Upload PDF</label>
+        <input type="file" accept=".pdf" multiple>
+        <label for="name">Name of notebook</label>
+        <input type="file" accept=".pdf" multiple>
+        <button type="submit">Upload</button>
     </form>
 {% endblock %}
