@@ -31,27 +31,27 @@
             let currentPdfIndex = 0;
             
             // handle PDF file selection
-            document.getElementById('pdfInput').addEventListener('change', function(e) {
+            document.getElementById("pdfInput").addEventListener("change", function(e) {
                 pdfFiles = Array.from(e.target.files);
                 currentPdfIndex = 0;
                 if (pdfFiles.length > 0) {
-                    document.getElementById('pdf-viewer-controls').style.display = 'inline-block';
+                    document.getElementById("pdf-viewer-controls").style.display = "inline-block";
                     showPdf(currentPdfIndex);
                 } else {
-                    document.getElementById('pdfDisplay').innerHTML = '';
-                    document.getElementById('pdf-viewer-controls').style.display = 'none';
+                    document.getElementById("pdfDisplay").innerHTML = "";
+                    document.getElementById("pdf-viewer-controls").style.display = "none";
                 }
             });
 
             // view previous PDF
-            document.getElementById('prevPdfBtn').onclick = function() {
+            document.getElementById("prevPdfBtn").onclick = function() {
                 if (pdfFiles.length === 0) return;
                 currentPdfIndex = (currentPdfIndex - 1 + pdfFiles.length) % pdfFiles.length;
                 showPdf(currentPdfIndex);
             };
 
             // view next PDF
-            document.getElementById('nextPdfBtn').onclick = function() {
+            document.getElementById("nextPdfBtn").onclick = function() {
                 if (pdfFiles.length === 0) return;
                 currentPdfIndex = (currentPdfIndex + 1) % pdfFiles.length;
                 showPdf(currentPdfIndex);
@@ -61,8 +61,8 @@
             function showPdf(index) {
                 const file = pdfFiles[index];
                 const url = URL.createObjectURL(file);
-                document.getElementById('pdfDisplay').innerHTML = `<embed src="${url}" type="application/pdf" width="500" height="600">`;
-                document.getElementById('pdfCounter').textContent = `PDF ${index + 1} of ${pdfFiles.length}`;
+                document.getElementById("pdfDisplay").innerHTML = `<embed src="${url}" type="application/pdf" width="500" height="600">`;
+                document.getElementById("pdfCounter").textContent = `PDF ${index + 1} of ${pdfFiles.length}`;
             }
             </script>
         </main>

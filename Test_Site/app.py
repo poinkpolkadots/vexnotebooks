@@ -25,18 +25,18 @@ def index():
 @app.route("/upload/", methods=("GET", "POST"))
 def create():
     if request.method == "POST":
-        file = request.files['upload']
+        file = request.files["upload"]
         name = request.form["name"]
 
         conn = get_db_connection()
         cur = conn.cursor()
         if file:
-                cur.execute('INSERT INTO notebooks (pdf, mimetype, name)'
-                            'VALUES (%s, %s, %s)',
+                cur.execute("INSERT INTO notebooks (pdf, mimetype, name)"
+                            "VALUES (%s, %s, %s)",
                             (file.read(),file.mimetype, name))
         else:
-                cur.execute('INSERT INTO notebooks (name)'
-                            'VALUES (%s)',
+                cur.execute("INSERT INTO notebooks (name)"
+                            "VALUES (%s)",
                             (name,))
         conn.commit()
         cur.close()

@@ -1,10 +1,10 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block title %} Catalog {% endblock %}
 
 {% block content %}
     <h1>Notebooks</h1>
     {% for notebook in notebooks %}
-        <div class='catalog'>
+        <div class="catalog">
             <a href="{{ url_for(view) }}"><h1>{{ notebook[1] }}</h1></a>
         </div>
     {% endfor %}

@@ -36,7 +36,7 @@ def summarize_image_pdf_pages(pdf_path): #main function to summarize each page o
     intepret = lms.llm("zai-org/glm-4.6v-flash") #model for interpreting images TODO: use a faster model pls
     page_summaries = [] #list to hold summaries of each page
     for i, image in enumerate(pdf_to_images(pdf_path)): #iterate through each page image in the pdf
-        pagechat = lms.Chat.from_history({'messages': [ #TODO: figure out system and user prompts
+        pagechat = lms.Chat.from_history({"messages": [ #TODO: figure out system and user prompts
             { "role": "system", "content": (
                 "You are a VEX Robotics Judge"s Assistant. Your task is to extract evidence from notebook pages based on the 2025 REC Foundation Rubric."
                 "Give a quick and detailed summary; do not reason, just extract evidence. Focus on extracting evidence that relates to the rubric criteria, "
