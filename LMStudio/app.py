@@ -36,9 +36,9 @@ def summarize_image_pdf_pages(pdf_path): #main function to summarize each page o
     intepret = lms.llm("zai-org/glm-4.6v-flash") #model for interpreting images TODO: use a faster model pls
     page_summaries = [] #list to hold summaries of each page
     for i, image in enumerate(pdf_to_images(pdf_path)): #iterate through each page image in the pdf
-        pagechat = lms.Chat.from_history({"messages": [ #TODO: figure out system and user prompts
+        pagechat = lms.Chat.from_history({'messages': [ #TODO: figure out system and user prompts
             { "role": "system", "content": (
-                "You are a VEX Robotics Judge's Assistant. Your task is to extract evidence from notebook pages based on the 2025 REC Foundation Rubric."
+                "You are a VEX Robotics Judge"s Assistant. Your task is to extract evidence from notebook pages based on the 2025 REC Foundation Rubric."
                 "Give a quick and detailed summary; do not reason, just extract evidence. Focus on extracting evidence that relates to the rubric criteria, "
                 "do not worry about formatting or organization of the evidence, just extract as much relevant evidence as you can."
             )}, { "role": "user", "content": (
@@ -56,9 +56,9 @@ model = lms.llm("llama-3.2-3b-instruct")
 
 for fragment in model.respond_stream(lms.Chat.from_history({"messages": [ #chat for summaries
     { "role": "system", "content": (
-        'You are acting as an assistant to VEX Robotics Judges. '
-        'You will generate resources for them to help them in grading engineering notebooks. Write in a way such that a highschooler would understand what you are saying.'
-        'Do not grade or rank the notebooks, act only as an assistant, generating questions to help the actual judges with evaluating and grading notebooks.'
+        "You are acting as an assistant to VEX Robotics Judges. "
+        "You will generate resources for them to help them in grading engineering notebooks. Write in a way such that a highschooler would understand what you are saying."
+        "Do not grade or rank the notebooks, act only as an assistant, generating questions to help the actual judges with evaluating and grading notebooks."
     )}, { "role": "user", "content": (
         "Given the following notebook, generate a list of questions that a judge should ask themselves when evaluating the notebook. "
         "The questions should be based on the 2025 REC Foundation Rubric criteria, and should help the judge evaluate the notebook based on the evidence provided in the summaries. "
