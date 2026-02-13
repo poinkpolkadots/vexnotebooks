@@ -6,9 +6,9 @@ app = Flask(__name__)
 
 def get_db_connection():
     conn = psycopg2.connect(
-        host="drhscit.org", 
+        host="drhscit.org",
         database=os.environ["DB"],
-        user=os.environ["DB_UN"], 
+        user=os.environ["DB_UN"],
         password=os.environ["DB_PW"])
     return conn
 
@@ -33,7 +33,7 @@ def create():
         if file:
                 cur.execute('INSERT INTO notebooks (pdf, mimetype, name)'
                             'VALUES (%s, %s, %s)',
-                            (file.read(),file.mimetype, name))    
+                            (file.read(),file.mimetype, name))
         else:
                 cur.execute('INSERT INTO notebooks (name)'
                             'VALUES (%s)',
@@ -56,7 +56,7 @@ def delete(id):
 
     return redirect(url_for("index"))
 
-@app.route("/edit/<int:id>", methods = ("GET", "POST"))
+@app.route("/view/<int:id>", methods = ("GET", "POST"))
 def edit(id):
     #GET:
     if request.method == "GET":
@@ -67,8 +67,8 @@ def edit(id):
         cur.close()
         conn.close()
 
-        return render_template("edit.html", notebook = data)
-    
+        return render_template("view.html", notebook = data)
+
     #POST:
     elif request.method == "POST":
         name = request.form["name"]
@@ -77,7 +77,7 @@ def edit(id):
         cur = conn.cursor()
         cur.execute("UPDATE notebooks SET name = %s WHERE id = %s",
                     (name, id))
-        
+
         conn.commit()
         cur.close()
         conn.close()
