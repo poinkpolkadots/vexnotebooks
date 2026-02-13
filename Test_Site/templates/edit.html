@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{% block title %} Edit Your Review {% endblock %}</h1>
+    <!--Editing a review will look like creating a review, but there are some things you will need to change below. How can you make it so the form is pre-filled with the user"s original review so that they can edit it, rather than starting from scratch? -->
+    <form method="post">
+        <p>
+            <label for="name">Name of notebook</label>
+            <input type="text" name="name" id="name"
+                   value="{{ notebook[3] }}">
+            </input>
+        </p>
+        <p>
+            <button type="submit">Submit</button>
+        </p>
+    </form>
+{% endblock %}
