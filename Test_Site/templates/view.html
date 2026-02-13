@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>{% block title %} Edit Your Review {% endblock %}</h1>
+    <h1>{% block title %} {{ notebook[3] }} {% endblock %}</h1>
     <!--Editing a review will look like creating a review, but there are some things you will need to change below. How can you make it so the form is pre-filled with the user"s original review so that they can edit it, rather than starting from scratch? -->
+    <h1>LLM Output</h1>
+    <h6>Uploaded on {{ notebook[4] }}</h6>
+    <p>{{ notebook[5] }}</p>
     <form method="post">
         <p>
             Edit Notebook Name
