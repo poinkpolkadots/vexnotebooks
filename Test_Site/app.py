@@ -31,9 +31,9 @@ def create():
         conn = get_db_connection()
         cur = conn.cursor()
         if file:
-                cur.execute("INSERT INTO notebooks (pdf, mimetype, name)"
-                            "VALUES (%s, %s, %s)",
-                            (file.read(),file.mimetype, name))
+            cur.execute('INSERT INTO notebooks (pdf, mimetype, name)'
+                        'VALUES (%s, %s, %s, %s)',
+                        (file.read(), file.mimetype, name))
         else:
                 cur.execute("INSERT INTO notebooks (name)"
                             "VALUES (%s)",
