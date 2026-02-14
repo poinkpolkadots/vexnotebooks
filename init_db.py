@@ -14,12 +14,12 @@ def init():
     cur = conn.cursor()
 
     cur.execute(
-        "DROP TABLE IF EXISTS main;"
-        "CREATE TABLE main ("
+        "DROP TABLE IF EXISTS registry;"
+        "CREATE TABLE registry ("
             "id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,"
-            "image BYTEA,"
-            "mimetype VARCHAR(100),"
-            "date DATE DEFAULT CURRENT_DATE NOT NULL"
+            "name VARCHAR(255) NOT NULL,"
+            "path TEXT NOT NULL,"
+            "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
         ");"
     )
 
