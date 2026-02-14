@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %} view {% endblock %}
+
+{% block content %}
+    {% for pdf in pdfs %}
+        <div class="review">
+            <h2>{{ pdf[0] }}</h2>
+            <p>{{ pdf[1] }}</p>
+        </div>
+    {% endfor %}
+{% endblock %}

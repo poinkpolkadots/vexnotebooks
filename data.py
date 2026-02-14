@@ -49,20 +49,19 @@ def summarize_image_pdf_pages(pdf_path): #main function to summarize each page o
     
     return page_summaries #return list of page summaries
 
-model = lmstudio.llm("llama-3.2-3b-instruct")
-
-for fragment in model.respond_stream(lmstudio.Chat.from_history({"messages": [ #chat for summaries
-    { "role": "system", "content": (
-        'You are acting as an assistant to VEX Robotics Judges. '
-        'You will generate resources for them to help them in grading engineering notebooks. Write in a way such that a highschooler would understand what you are saying.'
-        'Do not grade or rank the notebooks, act only as an assistant, generating questions to help the actual judges with evaluating and grading notebooks.'
-    )}, { "role": "user", "content": (
-        "Given the following notebook, generate a list of questions that a judge should ask themselves when evaluating the notebook. "
-        "The questions should be based on the 2025 REC Foundation Rubric criteria, and should help the judge evaluate the notebook based on the evidence provided in the summaries. "
-        "The questions should be general enough to apply to any notebook, but specific enough to be helpful in evaluating the notebook based on the evidence provided."
-        "Here is the notebook in text form, understand that there were images left out:\n" + 
-        pdf_to_text("C:/Users/lawre/OneDrive/Documents/vex/vexnotebooks/HTML_Site/pdfs/Sample2-Engineering-notebook.pdf")
-    )}
-]})):
-    print(fragment.content, end="", flush=True)
-print()
+#model = lmstudio.llm("llama-3.2-3b-instruct")
+#for fragment in model.respond_stream(lmstudio.Chat.from_history({"messages": [ #chat for summaries
+#    { "role": "system", "content": (
+#        'You are acting as an assistant to VEX Robotics Judges. '
+#        'You will generate resources for them to help them in grading engineering notebooks. Write in a way such that a highschooler would understand what you are saying.'
+#        'Do not grade or rank the notebooks, act only as an assistant, generating questions to help the actual judges with evaluating and grading notebooks.'
+#    )}, { "role": "user", "content": (
+#        "Given the following notebook, generate a list of questions that a judge should ask themselves when evaluating the notebook. "
+#        "The questions should be based on the 2025 REC Foundation Rubric criteria, and should help the judge evaluate the notebook based on the evidence provided in the summaries. "
+#        "The questions should be general enough to apply to any notebook, but specific enough to be helpful in evaluating the notebook based on the evidence provided."
+#        "Here is the notebook in text form, understand that there were images left out:\n" + 
+#        pdf_to_text("C:/Users/lawre/OneDrive/Documents/vex/vexnotebooks/HTML_Site/pdfs/Sample2-Engineering-notebook.pdf")
+#    )}
+#]})):
+#    print(fragment.content, end="", flush=True)
+#print()
