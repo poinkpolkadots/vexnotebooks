@@ -16,7 +16,7 @@ cur.execute("CREATE TABLE notebooks (id INTEGER GENERATED ALWAYS AS IDENTITY PRI
             "mimetype VARCHAR(100),"
             "name TEXT NOT NULL,"
             "date DATE DEFAULT CURRENT_DATE NOT NULL,"
-            "output LONGTEXT);"
+            "output TEXT);"
                                 )
 
 conn.commit()

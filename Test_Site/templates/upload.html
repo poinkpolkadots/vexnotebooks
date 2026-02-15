@@ -1,13 +1,13 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block title %} Review {% endblock %}
 
 {% block content %}
     <h1>Leave a Review</h1>
     <form method="post" enctype="multipart/form-data">
-        <label for="upload">Upload PDF</label>
-        <input type="file" accept=".pdf" name="upload" id="upload" multiple>
         <label for="name">Name of notebook</label>
         <input type="text" accept=".pdf" name="name" id="name" multiple>
+        <label for="upload">Upload PDF</label>
+        <input type="file" accept=".pdf" name="upload" id="upload" multiple>
         <button type="submit">Upload</button>
     </form>
 {% endblock %}

@@ -1,15 +1,11 @@
-{% extends 'base.html' %}
-{% block title %} Read Reviews {% endblock %}
+{% extends "base.html" %}
+{% block title %} Catalog {% endblock %}
 
 {% block content %}
-    <h1>Customer Reviews</h1>
-    {% for review in reviews %}
-        <div class='reviews'>
-            <h1>{{ review[1] }}</h1>
-            <h2>By {{ review[2] }}</h2>
-            <p style="font-style: italic;">{{ review[3] }} pages</h3>
-            <p class='review'>{{ review[4] }}</p>
-            <p>{{ review[5] }}</p>
+    <h1>Notebooks</h1>
+    {% for notebook in notebooks %}
+        <div class="catalog">
+            <a href="{{ url_for(view) }}"><h1>{{ notebook[1] }}</h1></a>
         </div>
     {% endfor %}
 {% endblock %}
