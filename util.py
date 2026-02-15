@@ -1,4 +1,6 @@
-import lmstudio, fitz, os, shutil
+import lmstudio, fitz, os, shutil, psycopg2
+
+folder = "C:\\vexnotebooks"
 
 def pdf_to_images(path): #convert each page of a PDF to an image and return list of images
     doc = fitz.open(path) #open the PDF document
@@ -48,6 +50,36 @@ def summarize_image_pdf_pages(pdf_path): #main function to summarize each page o
         print(res) #TODO: THIS IS DEBUG, REMOVE LATER
     
     return page_summaries #return list of page summaries
+
+def get_db_connection():
+    conn = psycopg2.connect( #defaults for local testing TODO: change to env variables later
+        host="localhost",
+        database="vexpdfs",
+        user="postgres",
+        password="1q2w3e4r"
+    )
+    return conn
+
+def reset():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "DROP TABLE IF EXISTS registry;"
+        "CREATE TABLE registry ("
+            "id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,"
+            "name VARCHAR(255) NOT NULL,"
+            "pdf_path TEXT NOT NULL,"
+            "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+        ");"
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    if os.path.exists(folder):
+        shutil.rmtree(folder)
+    os.makedirs(os.path.join(folder, "pdf"), exist_ok=True)
+    os.makedirs(os.path.join(folder, "txt"), exist_ok=True)
 
 #model = lmstudio.llm("llama-3.2-3b-instruct")
 #for fragment in model.respond_stream(lmstudio.Chat.from_history({"messages": [ #chat for summaries

@@ -1,12 +1,11 @@
 import secrets, uuid
 from werkzeug.utils import secure_filename
-from init_db import *
 from flask import *
-from data import *
+from util import *
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = secrets.token_hex(16)
-app.config["UPLOAD_FOLDER"] = pdf_folder
+app.config["UPLOAD_FOLDER"] = folder + "\\pdf"
 
 @app.route("/")
 def index():
@@ -29,7 +28,7 @@ def upload():
             name = secure_filename(f"{str(uuid.uuid4())[:4]}_{file.filename}")
             path = os.path.join(app.config["UPLOAD_FOLDER"], name)
             file.save(path)
-            cur.execute("INSERT INTO registry (name, path) VALUES (%s, %s)", (name, path))
+            cur.execute("INSERT INTO registry (name, pdf_path) VALUES (%s, %s)", (name, path))
         
         conn.commit()
         cur.close()
@@ -45,7 +44,7 @@ def view(name):
 def delete(name):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT path FROM registry WHERE name = %s", (name,))
+    cur.execute("SELECT pdf_path FROM registry WHERE name = %s", (name,))
     path = cur.fetchone()[0]
     os.remove(path)
     cur.execute("DELETE FROM registry WHERE name = %s", (name,))
