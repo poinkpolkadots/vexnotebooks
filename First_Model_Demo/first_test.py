@@ -1,8 +1,15 @@
 import requests
 import json
 from datetime import datetime
+from langchain_community.document_loaders import PDFMinerLoader
 
 start = datetime.now()
+
+file_path = "./rubric/rubric.pdf"
+loader = PDFMinerLoader(file_path,
+                        mode="single",
+                        )
+docs = loader.load()
 
 url = "http://localhost:11434/api/generate"
 
