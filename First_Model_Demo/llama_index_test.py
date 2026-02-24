@@ -24,3 +24,11 @@ query_engine = rubric_index.as_query_engine()
 # Let's run one query
 response = query_engine.query("list all the tasks that work with bart")
 print(response)
+
+from llama_index.core.prompts import RichPromptTemplate
+template_str = """We have provided context information below.
+---------------------
+{{ context_str }}
+---------------------
+Given this information, please answer the question: {{ query_str }}
+"""
