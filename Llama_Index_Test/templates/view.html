@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <!--title of notebook-->
     <h1>{% block title %}{{ notebook[1] }}{% endblock %}</h1>
-    <!--Editing a review will look like creating a review, but there are some things you will need to change below. How can you make it so the form is pre-filled with the user"s original review so that they can edit it, rather than starting from scratch? -->
+    <!--upload date-->
     <h6>Uploaded on {{ notebook[4] }}</h6>
+    <!--able to edit name of notebook within the notebook viewing page-->
     <form method="post">
         <p>
             Edit Notebook Name
@@ -15,6 +17,7 @@
             <button type="submit">Submit</button>
         </p>
     </form>
+    <!--right now, just displaying llm output as text-->
     <h2>LLM Output</h2>
     <p>{{ notebook[3] }}</p>
 {% endblock %}
