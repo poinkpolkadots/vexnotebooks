@@ -1,8 +1,28 @@
 import os
 import psycopg2
 from flask import Flask, render_template, request, url_for, redirect
+from llama_index.llms.ollama import Ollama
+from llama_index.readers.schema.base import Document
+from llama_index import VectorStoreIndex
+from llmsherpa.readers import LayoutPDFReader
 
 app = Flask(__name__)
+
+llm = Ollama(
+    model="llama3.2:3b",
+    request_timeout=120.0,
+    # Manually set the context window to limit memory usage
+    context_window=8000,
+)
+
+prompt = "output the following information for a VEX Robotics Judge to \
+            assist in their grading of a student engineering journal. \
+            1. Notebook summary \
+            2. Completeness score (structural, not rubric score) \
+            3. Section presence checklist \
+            4. Flags for judges to review \
+            output your response in a structured manner with appropriate headings \
+            make sure to not be overly verbose and write in a way that is easy to understand"
 
 def get_db_connection():
     conn = psycopg2.connect(
@@ -28,12 +48,21 @@ def create():
         file = request.files["upload"]
         name = request.form["name"]
 
+        notebook_reader = LayoutPDFReader(llmsherpa_api_url)
+        notebook = notebook_reader.read_pdf(file)
+        notebook_index = VectorStoreIndex([])
+        for chunk in notebook.chunks():
+            notebook_index.insert(Document(text=chunk.to_context_text(), extra_info={}))
+        query_engine = notebook_index.as_query_engine()
+
+        response = query_engine.query(prompt)
+
         conn = get_db_connection()
         cur = conn.cursor()
         if file:
-            cur.execute('INSERT INTO notebooks (notebook_name)'
-                        'VALUES (%s, %s, %s, %s)',
-                        (name,))
+            cur.execute('INSERT INTO notebooks (notebook_name, output)'
+                        'VALUES (%s, %s)',
+                        (name, response))
         else:
                 cur.execute("INSERT INTO notebooks (notebook_name)"
                             "VALUES (%s)",
