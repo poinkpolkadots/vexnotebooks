@@ -31,26 +31,6 @@ def pdf_to_text(path): #convert PDF to text
     doc.close() #close the PDF document
     return text #return the extracted text
 
-def summarize_image_pdf_pages(pdf_path): #main function to summarize each page of a PDF given the path to the PDF
-    intepret = lmstudio.llm("zai-org/glm-4.6v-flash") #model for interpreting images TODO: use a faster model pls
-    page_summaries = [] #list to hold summaries of each page
-    for i, image in enumerate(pdf_to_images(pdf_path)): #iterate through each page image in the pdf
-        pagechat = lmstudio.Chat.from_history({"messages": [ #TODO: figure out system and user prompts
-            { "role": "system", "content": (
-                "You are a VEX Robotics Judge's Assistant. Your task is to extract evidence from notebook pages based on the 2025 REC Foundation Rubric."
-                "Give a quick and detailed summary; do not reason, just extract evidence. Focus on extracting evidence that relates to the rubric criteria, "
-                "do not worry about formatting or organization of the evidence, just extract as much relevant evidence as you can."
-            )}, { "role": "user", "content": (
-                "Extract all evidence on this page that relates to the Engineering Notebook Rubric criteria."
-            ), "images": [image]}
-        ]})
-
-        res = intepret.respond(pagechat, config={ "temperature": 0.0 }).content #get summary for each page without any DREAMING
-        page_summaries.append(res) #add summary to list
-        print(res) #TODO: THIS IS DEBUG, REMOVE LATER
-    
-    return page_summaries #return list of page summaries
-
 def get_db_connection():
     conn = psycopg2.connect( #defaults for local testing TODO: change to env variables later
         host="localhost",
@@ -81,6 +61,27 @@ def reset():
     os.makedirs(os.path.join(folder, "pdf"), exist_ok=True)
     os.makedirs(os.path.join(folder, "txt"), exist_ok=True)
 
+#OLD IMPLEMENTATION
+#def summarize_image_pdf_pages(pdf_path): #main function to summarize each page of a PDF given the path to the PDF
+#    intepret = lmstudio.llm("zai-org/glm-4.6v-flash") #model for interpreting images TODO: use a faster model pls
+#    page_summaries = [] #list to hold summaries of each page
+#    for i, image in enumerate(pdf_to_images(pdf_path)): #iterate through each page image in the pdf
+#        pagechat = lmstudio.Chat.from_history({"messages": [ #TODO: figure out system and user prompts
+#            { "role": "system", "content": (
+#                "You are a VEX Robotics Judge's Assistant. Your task is to extract evidence from notebook pages based on the 2025 REC Foundation Rubric."
+#                "Give a quick and detailed summary; do not reason, just extract evidence. Focus on extracting evidence that relates to the rubric criteria, "
+#                "do not worry about formatting or organization of the evidence, just extract as much relevant evidence as you can."
+#            )}, { "role": "user", "content": (
+#                "Extract all evidence on this page that relates to the Engineering Notebook Rubric criteria."
+#            ), "images": [image]}
+#        ]})
+#
+#        res = intepret.respond(pagechat, config={ "temperature": 0.0 }).content #get summary for each page without any DREAMING
+#        page_summaries.append(res) #add summary to list
+#        print(res) #TODO: THIS IS DEBUG, REMOVE LATER
+#    
+#    return page_summaries #return list of page summaries
+#
 #model = lmstudio.llm("llama-3.2-3b-instruct")
 #for fragment in model.respond_stream(lmstudio.Chat.from_history({"messages": [ #chat for summaries
 #    { "role": "system", "content": (
