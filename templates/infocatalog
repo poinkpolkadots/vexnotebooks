@@ -1,0 +1,92 @@
+<div class="info-header">
+        <p class="notebook-title">Team3Notebook.pdf</p>
+        <div class="score-pill">80/100</div>
+        <button class="download-btn">
+            Download PDF 
+            <img alt="download symbol" src="../graphics/download symbol.png" class="download-icon">
+        </button>
+    </div>
+
+    <div class="dashboard-container">
+        
+        <div class="dashboard-top-row">
+            
+            <div class="top-left-column">
+                <div class="dashboard-box summary-div">
+                    <p><strong>Summary:</strong></p>
+                    <p>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br>
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br>
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</p>
+                </div>
+                
+                <div class="flags-iterations-row">
+                    <div class="dashboard-box flags-div">
+                        <p class="box-title">&#9873; Flags for review:</p>
+                        <p>Overly polished technical language (pg 37)<br>
+                        Sudden tone shift (pg 14)<br>
+                        Missing test data (pg 28)</p>
+                    </div>
+                    <div class="dashboard-box iterations-div">
+                        <p class="box-title">Number of Iterations:</p>
+                        <p>Page Numbers:</p>
+                        <ul>
+                            <li>12-30</li>
+                            <li>30-42</li>
+                            <li>42-56</li>
+                        </ul>
+                        <p class="iteration-count">Three</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-box sections-div">
+                <p class="box-title">Sections:</p>
+                <ul>
+                    <li>Problem definition & goals</li>
+                    <li>Brainstorming</li>
+                    <li>Design decisions</li>
+                    <li>Iteration / redesign</li>
+                    <li>Build and programming</li>
+                </ul>
+                <p class="box-title">Missing/Weak Sections:</p>
+                <ul>
+                    <li class="highlight-text">Testing and Results</li>
+                </ul>
+                <p class="box-title">Completeness Score: 80/100</p>
+            </div>
+        </div>
+
+        <div class="dashboard-box questions-div">
+            <p class="box-title">Interview Questions:</p>
+            <ul>
+                <li>Why did you decide to do three iterations?</li>
+                <li>How did you solve your programing and building issues?</li>
+                <li>Why did you not document your testing and results?</li>
+            </ul>
+        </div>
+
+        <div class="dashboard-box design-process-div">
+            <table>
+                <tr>
+                    <th>Engineering Design Process</th>
+                    <th>Evidence Found</th>
+                    <th>Confidence Level</th>
+                </tr>
+                <tr>
+                    <td>Identify the problem</td>
+                    <td>Sets clear goals</td>
+                    <td>Medium</td>
+                </tr>
+                <tr>
+                    <td>Brainstorming and Selection</td>
+                    <td>3 design ideas with sketches</td>
+                    <td>High</td>
+                </tr>
+                <tr>
+                    <td>Build the Solution</td>
+                    <td>Various images and descriptions</td>
+                    <td>Medium</td>
+                </tr>
+                </table>
+        </div>
+    </div>
