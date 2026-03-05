@@ -2,11 +2,13 @@ from llama_index.core import MultiModalVectorStoreIndex
 from llama_index.embeddings.clip import ClipEmbedding
 from llama_index.llms.ollama import Ollama
 from llama_index.core.schema import TextNode, ImageNode
+from util import *
 
 nodes = []
 
-nodes.append(TextNode(text="Revenue increased due to higher sales"))
-nodes.append(ImageNode(image_path="chart.png"))
+def add_data_from_pdf(path):
+    nodes.append(TextNode(text=pdf_to_text(path=path)))
+    #nodes.append(ImageNode(image_path=""))
 
 index = MultiModalVectorStoreIndex(
     nodes,
