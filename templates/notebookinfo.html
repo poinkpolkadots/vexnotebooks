@@ -3,130 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/styles.css">
-    <title>Document</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <title>Notebook Details</title>
 </head>
 <body>
     <div class="nav-bar">
         <a href="home.html">Home</a>
         <a href="upload.html">Upload</a>
-        <a href="catalog.html">Catalog</a>
+        <a href="catalog.html" class="active">Catalog</a>
     </div>
 
-    <div>
-        <p>name.pdf</p>
-        <div><p>xx/100</p></div><!--Completeness score-->
-        <button>Download PDF <img alt="download symbol" src="../graphics/download symbol.png"></button><!--still needs to be made functional-->
+    <div class="info-header">
+        <p class="notebook-title">Team3Notebook.pdf</p>
+        <div class="score-pill">80/100</div>
+        <button class="download-btn">
+            Download PDF 
+            <img alt="down" src="graphics/download symbol.png" class="download-icon"> <!--dont have the png so it doesnt show up rn-->
+        </button>
     </div>
 
-    <div><!--template stuff-->
-        <div>
-            <div>
-                <div class="summary-div">
+    <div class="dashboard-container">
+        
+        <div class="dashboard-top-row">
+            
+            <div class="top-left-column">
+                <div class="dashboard-box summary-div">
                     <p><strong>Summary:</strong></p>
-                    <p>Summary content</p>
+                    <p>This notebook covers the full design cycle of the robot, focusing on the intake mechanism and drivetrain iterations. It includes detailed sketches and CAD models.</p>
                 </div>
-                <div>
-                    <div class="flags-div">
-                        <p>&#9873; Flags for review:</p>
+                
+                <div class="flags-iterations-row">
+                    <div class="dashboard-box flags-div">
+                        <p class="box-title">&#9873; Flags for review:</p>
                         <ul>
-                            <li>flag 1 (page)</li>
-                            <li>flag 2 (page)</li>
-                            <li>flag 3 (page)</li>
+                            <li>Overly polished language (pg 37)</li>
+                            <li>Sudden tone shift (pg 14)</li>
+                            <li>Missing test data (pg 28)</li>
                         </ul>
                     </div>
-                    <div class="iterations-div">
-                        <p>Number of iterations: #</p>
-                        <p>Page numbers:</p>
+                    <div class="dashboard-box iterations-div">
+                        <p class="box-title">Number of Iterations:</p>
+                        <p>Page Numbers:</p>
                         <ul>
-                            <li>range 1</li>
-                            <li>range 2</li>
-                            <li>range 3</li>
+                            <li>12-30</li>
+                            <li>30-42</li>
+                            <li>42-56</li>
                         </ul>
+                        <p class="iteration-count">Three</p>
                     </div>
                 </div>
             </div>
-            <div class="sections-div">
-                <p>Sections:</p>
+
+            <div class="dashboard-box sections-div">
+                <p class="box-title">Sections:</p>
                 <ul>
-                    <li>section 1</li>
-                    <li>section 2</li>
-                    <li>section 3</li>
-                    <li>section 4</li>
-                    <li>section 5</li>
+                    <li>Problem definition & goals</li>
+                    <li>Brainstorming</li>
+                    <li>Design decisions</li>
+                    <li>Iteration / redesign</li>
+                    <li>Build and programming</li>
                 </ul>
-                <p>Missing/Weak Sections:</p>
+                <p class="box-title">Missing/Weak Sections:</p>
                 <ul>
-                    <li>section 1</li>
-                    <li>section 2</li>
+                    <li class="highlight-text">Testing and Results</li>
                 </ul>
-                <p>Completeness score: xx/100</p>
+                <p class="box-title">Completeness Score: 80/100</p>
             </div>
         </div>
-        <div class="questions-div">
-            <p>Interview Questions:</p>
+
+        <div class="dashboard-box questions-div">
+            <p class="box-title">Interview Questions:</p>
             <ul>
-                <li>question 1</li>
-                <li>question 2</li>
-                <li>question 3</li>
+                <li>Why did you decide to do three iterations?</li>
+                <li>How did you solve your programming and building issues?</li>
+                <li>Why did you not document your testing and results?</li>
             </ul>
         </div>
-        <div class="design-process-div">
+
+        <div class="dashboard-box design-process-div">
             <table>
                 <tr>
-                    <th>Engineering Design process</th>
+                    <th>Engineering Design Process</th>
                     <th>Evidence Found</th>
-                    <th>Confidence Level</th><!--low/medium/high-->
+                    <th>Confidence Level</th>
                 </tr>
                 <tr>
                     <td>Identify the problem</td>
-                    <td>Text</td>
-                    <td>Text</td>
+                    <td>Sets clear goals</td>
+                    <td>Medium</td>
                 </tr>
                 <tr>
-                    <td>Brainstorm solutions</td>
-                    <td>Text</td>
-                    <td>Text</td>
+                    <td>Brainstorming and Selection</td>
+                    <td>3 design ideas with sketches</td>
+                    <td>High</td>
                 </tr>
                 <tr>
-                    <td>Select best solution</td>
-                    <td>Text</td>
-                    <td>Text</td>
+                    <td>Build the Solution</td>
+                    <td>Various images and descriptions</td>
+                    <td>Medium</td>
                 </tr>
                 <tr>
-                    <td>Build + program solution</td>
-                    <td>Text</td>
-                    <td>Text</td>
+                    <td>Testing & Repeat</td>
+                    <td>Missing data points</td>
+                    <td>Low</td>
                 </tr>
-                <tr>
-                    <td>Testing solutions</td>
-                    <td>Text</td>
-                    <td>Text</td>
-                </tr>
-                <tr>
-                    <td>Repeat design process</td>
-                    <td>Text</td>
-                    <td>Text</td>
-                </tr>
-                <tr>
-                    <td>Independent inquiry</td>
-                    <td>Text</td>
-                    <td>Text</td>
-                </tr>
-                <tr>
-                    <td>Usability & completeness</td>
-                    <td>Text</td>
-                    <td>Text</td>
-                </tr>
-                <tr>
-                    <td>Project management</td>
-                    <td>Text</td>
-                    <td>Text</td>
-                </tr>
-
             </table>
         </div>
     </div>
-
 </body>
 </html>
