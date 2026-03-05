@@ -3,22 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/styles.css">
-    <title>Document</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <title>Notebook Catalog</title>
 </head>
 <body>
-    <!--Navigation bar at the top of the screen-->
     <div class="nav-bar">
         <a href="home.html">Home</a>
         <a href="upload.html">Upload</a>
-        <a href="catalog.html">Catalog</a>
+        <a href="catalog.html" class="active">Catalog</a>
     </div>
-    <p>Select a notebook to view information:</p>
-    <a href="notebookinfo.html">
-    <div class="notebook-overview" href=""><!--This is the box for each individual notebook-->
-        <p>name.pdf</p>
-        <img class="notebook-thumbnail"> <!--First page of the pdf, acts as a thumbnail for it (not sure if using img is the right way to do this)-->
+
+    <p class="catalog-instruction">Select a notebook to view information:</p>
+
+    <div class="catalog-grid">
+        
+        <a href="notebookinfo.html" class="notebook-card">
+            <div class="notebook-overview">
+                <p class="notebook-name">Team_Alpha_Final.pdf</p>
+                <div class="thumbnail-placeholder">
+                    <img class="notebook-thumbnail" src="../graphics/pdf symbol.png" alt="PDF">
+                </div>
+            </div>
+        </a>
+
+        <a href="notebookinfo.html" class="notebook-card">
+            <div class="notebook-overview">
+                <p class="notebook-name">Mechanical_Design_V2.pdf</p>
+                <div class="thumbnail-placeholder">
+                    <img class="notebook-thumbnail" src="../graphics/pdf symbol.png" alt="PDF">
+                </div>
+            </div>
+        </a>
+
+        <a href="notebookinfo.html" class="notebook-card">
+            <div class="notebook-overview">
+                <p class="notebook-name">Programming_Logic.pdf</p>
+                <div class="thumbnail-placeholder">
+                    <img class="notebook-thumbnail" src="../graphics/pdf symbol.png" alt="PDF">
+                </div>
+            </div>
+        </a>
+
     </div>
-    </a>
 </body>
 </html>
