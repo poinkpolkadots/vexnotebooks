@@ -56,15 +56,17 @@ body {
     background-color: #d8d8d8;
     border: 2px solid black;
     border-radius: 20px;
-    padding: 10px 20px;
+    padding: 5px 10px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 7px;
     cursor: pointer;
+    font-weight: bold;
+    font-size: 15px;
 }
 
 .download-icon {
-    width: 20px;
+    width: 30px;
 }
 
 /* layout */
@@ -178,8 +180,107 @@ th {
     width: 180px;
 }
 
-.vex-logo{
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+.split {
+    height: 100%;
+    display: flex;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    overflow-x: hidden;
+    margin-top: 70px;
+    margin-left: 30px;
+  }
+  
+  /* Control the left side- cite W3 schools for code */
+.left {
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
+  
+/* Control the right side */
+.right {
+    right: 0;
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.upload-instructions {
+    font-size: 25px;
+}
+
+.upload-box {
+    background-color: #595959;
+    width: 670px;
+    border: 5px solid black;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 425px;
+}
+
+.vl { /*from W3 schools*/
+    border-left: 6px solid black;
+    height: 515px;
+    position: absolute;
+    padding-top: 50px;
+    left: 58%;
+}
+
+.upload-status-header {
+    text-align: left;
+    padding-left: 10px;
+    font-size: 25px;
+}
+
+.vic-button {
+    content: flex;
+    text-align: center;
+    align-self: center;
+    text-decoration: none;
+    background-color: #ba2f2f;
+    border: 2px solid black;
+    border-radius: 20px;
+    padding: 5px;
+    width: 300px;
+}
+
+.status-overview {
+    font-size: 20px;
+    align-self: center;
+    margin-bottom: -20px;
+}
+
+.status-table {
+    background: #595959;
+    border: 5px solid black;
+    width: 470px;
+    border-radius: 20px;
+}
+
+.pdf-status {
+    padding-left: 10px;
+    margin: 10px;
+    background:#dedddd;
+    border-radius: 40px;
+    padding-bottom: 8px;
+}
+
+.notebook-name {
+    text-decoration: underline;
+    padding: 1px;
+    padding-left: 10px;
+    margin-bottom: -35px;
+    font-size: 18px;
+}
+
+.indiv-status {
+    padding-left: 10px;
+}
+
+
+
