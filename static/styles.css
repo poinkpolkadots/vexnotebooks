@@ -1,4 +1,5 @@
-/* General Setup */
+/* yay css so fun */
+
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     background-color: #a5a5a5;
@@ -6,7 +7,7 @@ body {
     padding: 0;
 }
 
-/* Nav Bar */
+/* for the nav bar (general) */
 .nav-bar {
     background-color: #ba2f2f;
     padding: 15px 30px;
@@ -27,7 +28,7 @@ body {
     color: #ba2f2f;
 }
 
-/* Header Elements */
+/* main table header for the bottom section */
 .info-header {
     display: flex;
     align-items: center;
@@ -66,7 +67,7 @@ body {
     width: 20px;
 }
 
-/* Layout Containers */
+/* layout */
 .dashboard-container {
     background-color: #d8d8d8;
     border: 2px solid black;
@@ -85,9 +86,19 @@ body {
     padding: 15px;
 }
 
+/*some aesthetic blank spaces*/
+
 .dashboard-top-row {
     display: flex;
     gap: 20px;
+}
+
+.flags-div, .iterations-div {
+    flex: 1;
+}
+
+.sections-div {
+    flex: 1;
 }
 
 .top-left-column {
@@ -102,15 +113,8 @@ body {
     gap: 20px;
 }
 
-.flags-div, .iterations-div {
-    flex: 1;
-}
 
-.sections-div {
-    flex: 1;
-}
-
-/* Table Styling */
+/* basic styling of the table */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -132,22 +136,23 @@ th {
     padding: 0 5px;
 }
 
+
 .catalog-instruction {
     margin: 20px 40px;
-    font-size: 1.2rem;
-    font-weight: bold;
+    font-size: 1.8rem;
+    text-align: center;
 }
 
-/* The magic grid that makes columns */
+/* upload page columns/grid */
 .catalog-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 columns wide */
+    grid-template-columns: repeat(3, 1fr); /* makes it so its 3 in a row */
     gap: 30px;
     padding: 0 40px;
 }
 
 .notebook-card {
-    text-decoration: none; /* Removes the blue underline from links */
+    text-decoration: none;
     color: black;
 }
 
@@ -170,5 +175,5 @@ th {
 }
 
 .notebook-thumbnail {
-    width: 80px; /* Adjust based on your image size */
+    width: 180px;
 }
