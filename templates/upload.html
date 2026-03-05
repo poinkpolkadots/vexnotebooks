@@ -3,40 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/styles.css">
-    <title>Document</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <title>Notebook Catalog</title>
 </head>
 <body>
-    <!--Navigation bar at the top of the screen-->
     <div class="nav-bar">
         <a href="home.html">Home</a>
         <a href="upload.html">Upload</a>
-        <a href="catalog.html">Catalog</a>
+        <a href="catalog.html" class="active">Catalog</a>
     </div>
 
-    <div>
-        <p>Upload a New Engineering Notebook</p>
-        <div>
-            <img alt="pdf symbol" src="../graphics/pdf symbol.png">
-            <!--If someone with more knowledge could help me id appreciate it-->
-            <!--When this div is clicked, it should let the user upload a pdf-->
-        </div>
-    </div>
+    <p class="catalog-instruction">Select a notebook to view information:</p>
 
-    <div>
-        <p>Upload Status</p>
-        <div>
-            <div class="pdf-status">
-                <!--This is where the info for each uploaded pdf will go-->
-                <div>
-                <p>pdf name</p>
-                <p>status</p>
+    <div class="catalog-grid">
+        
+        <a href="notebookinfo.html" class="notebook-card">
+            <div class="notebook-overview">
+                <p class="notebook-name">Team_Alpha_Final.pdf</p>
+                <div class="thumbnail-placeholder">
+                    <img class="notebook-thumbnail" src="../graphics/pdf symbol.png" alt="PDF">
                 </div>
-                <div><p>&#x2705;</p></div><!--status in emoji form-->
             </div>
-        </div>
-        <p>Status Overview</p> <!--This is where the "2 complete | 1 in progress" part of the wireframe goes-->
-        <a href="catalog.html">View in Catalog &rarr;</a>
+        </a>
+
+        <a href="notebookinfo.html" class="notebook-card">
+            <div class="notebook-overview">
+                <p class="notebook-name">Mechanical_Design_V2.pdf</p>
+                <div class="thumbnail-placeholder">
+                    <img class="notebook-thumbnail" src="../graphics/pdf symbol.png" alt="PDF">
+                </div>
+            </div>
+        </a>
+
+        <a href="notebookinfo.html" class="notebook-card">
+            <div class="notebook-overview">
+                <p class="notebook-name">Programming_Logic.pdf</p>
+                <div class="thumbnail-placeholder">
+                    <img class="notebook-thumbnail" src="../graphics/pdf symbol.png" alt="PDF">
+                </div>
+            </div>
+        </a>
+
     </div>
 </body>
 </html>
