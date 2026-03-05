@@ -131,3 +131,44 @@ th {
     display: inline-block;
     padding: 0 5px;
 }
+
+.catalog-instruction {
+    margin: 20px 40px;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* The magic grid that makes columns */
+.catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns wide */
+    gap: 30px;
+    padding: 0 40px;
+}
+
+.notebook-card {
+    text-decoration: none; /* Removes the blue underline from links */
+    color: black;
+}
+
+.notebook-overview {
+    background-color: #d8d8d8;
+    border: 3px solid black;
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+}
+
+.thumbnail-placeholder {
+    background-color: white;
+    height: 250px;
+    border: 1px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.notebook-thumbnail {
+    width: 80px; /* Adjust based on your image size */
+}
