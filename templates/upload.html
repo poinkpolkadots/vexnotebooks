@@ -3,39 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="static/styles.css">
     <title>Document</title>
 </head>
 <body>
     <!--Navigation bar at the top of the screen-->
     <div class="nav-bar">
         <a href="home.html">Home</a>
-        <a href="upload.html">Upload</a>
+        <a href="upload.html" class="active">Upload</a>
         <a href="catalog.html">Catalog</a>
     </div>
-    <div>
-        <p>Upload a New Engineering Notebook</p>
-        <div>
-            <img alt="pdf symbol" src="../graphics/pdf symbol.png">
-            <!--If someone with more knowledge could help me id appreciate it-->
-            <!--When this div is clicked, it should let the user upload a pdf-->
+
+    <div class="split left">
+
+        <div class="upload-instructions">
+            <p>Upload a New Engineering Notebook</p>
         </div>
+
+        <div class="upload-box">
+            <img alt="pdf symbol" src="graphics/pdf symbol.png" style="width: 50px";>
+        </div>
+
+        <!--If someone with more knowledge could help me id appreciate it-->
+        <!--When this div is clicked, it should let the user upload a pdf-->
     </div>
-    <div>
-        <p>Upload Status</p>
-        <div>
+
+    <div class="vl">
+        <!--This is for the vertical line-->
+    </div>
+
+    <div class="split right">
+
+        <div class="upload-status-header">
+            <p>Upload Status</p>
+        </div>
+
+        <div class="status-table">
             <div class="pdf-status">
                 <!--This is where the info for each uploaded pdf will go-->
-                <div>
-                <p>pdf name</p>
-                <p>status</p>
+                
+                <div class="notebook-name">
+                    <p>Team3Notebook.pdf</p>
                 </div>
-                <div><p>&#x2705;</p></div><!--status in emoji form-->
+
+                <div class="indiv-status">
+                    <p>Upload Complete</p>
+                </div>
             </div>
         </div>
-        <p>Status Overview</p> <!--This is where the "2 complete | 1 in progress" part of the wireframe goes-->
-        <a href="catalog.html">View in Catalog &rarr;</a>
+
+        <div class="status-overview">
+            <p>1 Complete, 0 In Progress</p> <!--This is where the "2 complete | 1 in progress" part of the wireframe goes-->
+        </div>
+        
+        <div class="vic-button">
+            <a href="catalog.html" style="color: black;">View in Catalog &rarr; </a>
+        </div>
+
     </div>
 </body>
-
 </html>
