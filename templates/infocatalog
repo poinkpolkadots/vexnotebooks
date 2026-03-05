@@ -1,4 +1,19 @@
-<div class="info-header">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/styles.css">
+    <title>Notebook Details</title>
+</head>
+<body>
+    <div class="nav-bar">
+        <a href="home.html">Home</a>
+        <a href="upload.html">Upload</a>
+        <a href="catalog.html" class="active">Catalog</a>
+    </div>
+
+    <div class="info-header">
         <p class="notebook-title">Team3Notebook.pdf</p>
         <div class="score-pill">80/100</div>
         <button class="download-btn">
@@ -14,17 +29,17 @@
             <div class="top-left-column">
                 <div class="dashboard-box summary-div">
                     <p><strong>Summary:</strong></p>
-                    <p>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br>
-                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br>
-                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</p>
+                    <p>This notebook covers the full design cycle of the robot, focusing on the intake mechanism and drivetrain iterations. It includes detailed sketches and CAD models.</p>
                 </div>
                 
                 <div class="flags-iterations-row">
                     <div class="dashboard-box flags-div">
                         <p class="box-title">&#9873; Flags for review:</p>
-                        <p>Overly polished technical language (pg 37)<br>
-                        Sudden tone shift (pg 14)<br>
-                        Missing test data (pg 28)</p>
+                        <ul>
+                            <li>Overly polished language (pg 37)</li>
+                            <li>Sudden tone shift (pg 14)</li>
+                            <li>Missing test data (pg 28)</li>
+                        </ul>
                     </div>
                     <div class="dashboard-box iterations-div">
                         <p class="box-title">Number of Iterations:</p>
@@ -60,7 +75,7 @@
             <p class="box-title">Interview Questions:</p>
             <ul>
                 <li>Why did you decide to do three iterations?</li>
-                <li>How did you solve your programing and building issues?</li>
+                <li>How did you solve your programming and building issues?</li>
                 <li>Why did you not document your testing and results?</li>
             </ul>
         </div>
@@ -87,6 +102,13 @@
                     <td>Various images and descriptions</td>
                     <td>Medium</td>
                 </tr>
-                </table>
+                <tr>
+                    <td>Testing & Repeat</td>
+                    <td>Missing data points</td>
+                    <td>Low</td>
+                </tr>
+            </table>
         </div>
     </div>
+</body>
+</html>
