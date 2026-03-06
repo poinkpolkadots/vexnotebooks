@@ -3,102 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/styles.css"> 
+    <link rel="stylesheet" href="static/styles.css"> 
     <title>VEX Robotics Engineering Notebook AI</title>
 </head>
 <body class="home-body">
     <!--Navigation bar at the top of the screen-->
     <div class="nav-bar">
-        <a href="home.html">Home</a>
+        <a href="home.html" class="active"> Home</a>
         <a href="upload.html">Upload</a>
         <a href="catalog.html">Catalog</a>
     </div>
 
-    <div class="logo-div">
-        <img class="vex-logo" alt="VEX Robotics logo" src="../graphics/VEX-Robotics_Full-Color-1.png">
+    <div class="home-wrap">
+
+        <div class="home-split-left">
+            <div class="logo-div">
+                <img class="vex-logo" alt="VEX Robotics logo" src="graphics/VEX-Robotics_Full-Color-1.png">
+            </div>
+        </div>
+    
+        <div class="home-split-right">
+            <div class="home-buttons">
+                <div>
+                    <button class="upload-button" onclick="window.location.href='upload.html'">Upload</button>
+                </div>
+                <div>
+                    <button class="catalog-button" onclick="window.location.href='catalog.html'">Catalog</button>
+                </div>
+            </div>
+        </div>
+        
     </div>
-
-    <div class="home-buttons">
-        <div>
-            <button class="upload-button" onclick="window.location.href='upload.html'">Upload</button>
-        </div>
-        <style>
-            .upload-button {
-                margin-left: 900px;
-                margin-top: 170px;
-                background-color: rgb(100, 98, 98);
-                color: white;
-                border: 4px solid white;
-                font-size: 25px;
-                width: 220px;
-                height: 75px;
-                border-radius: 12px;
-            }
-        </style>
-        <div>
-            <button class="catalog-button" onclick="window.location.href='catalog.html'">Catalog</button>
-        </div>
-        <style>
-            .catalog-button {
-                margin-left: 900px;
-                margin-top: 50px;
-                background-color: rgb(100, 98, 98);
-                color: white;
-                border: 4px solid white;
-                font-size: 25px;
-                width: 220px;
-                height: 75px;
-                border-radius: 12px;
-            }
-        </style>
-
-
-
-        <style>
-        .container {
-            position: relative;
-            min-height: 100vh
-        }
-        .background-box {
-            position: absolute; 
-            top: 60px;
-            left: 0;
-            width: 680px;  
-            height: 608px; 
-            background-color: white;
-            z-index: -1;
-            border-radius: 100px;
-        }
-
-        .content {
-            margin-left: 320px;
-            padding: 20px;
-        }
-        </style>
-        <div class="background-box"></div>
-
-        <style>
-        .container {
-            position: relative;
-            min-height: 100vh
-        }
-        .background-box2 {
-            position: absolute; 
-            top: 60px;
-            left: 0;
-            width: 300px;  
-            height: 608px;
-            background-color: white;
-            z-index: -1;
-        }
-
-        .content {
-            margin-left: 400px;
-            padding: 20px;
-        }
-        </style>
-        <div class="background-box2"></div>
-
-
+    
+    
 </body>
 </html>
