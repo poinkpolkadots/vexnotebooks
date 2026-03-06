@@ -270,7 +270,7 @@ th {
     padding-bottom: 8px;
 }
 
-.notebook-name {
+.notebook-name-uploadpage {
     text-decoration: underline;
     padding: 1px;
     padding-left: 10px;
@@ -282,5 +282,40 @@ th {
     padding-left: 10px;
 }
 
+.home-wrapper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    overflow: hidden;
+}
 
+.home-split-left {
+    background: #dedddd;
+    width: 50%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 567px;
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+}
+
+.logo-div {
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    justify-self: center;
+    align-items: center;
+    min-height: 78px;
+}
+
+.home-split-right {
+    box-sizing: border-box;
+    background: #595959;
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+}
 
