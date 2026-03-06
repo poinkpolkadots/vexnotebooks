@@ -282,11 +282,14 @@ th {
     padding-left: 10px;
 }
 
-.home-wrapper {
+.home-wrap {
     display: flex;
     flex-direction: row;
     width: 100%;
     overflow: hidden;
+    background-image: url('graphics/kids_playing_with_robot.png');
+    background-position: right;
+    background-size: 60%;
 }
 
 .home-split-left {
@@ -313,9 +316,43 @@ th {
 
 .home-split-right {
     box-sizing: border-box;
-    background: #595959;
     width: 50%;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.home-buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 35%;
+    gap:30px;
+}
+
+.upload-button {
+    background-color: #595959;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 15px 40px;
+    width: 250px;
+    border: 5px solid white;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.catalog-button {
+    background-color: #595959;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 15px 40px;
+    width: 250px;
+    border: 5px solid white;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
