@@ -1,6 +1,6 @@
 import fitz, os, shutil, psycopg2
 
-STORAGE = "C:\\vexnotebooks"
+STORAGE = os.path.join(os.getcwd(), "vexnotebooks")
 
 def pdf_to_text(path): #convert PDF to text
     doc = fitz.open(path) #open the PDF document
