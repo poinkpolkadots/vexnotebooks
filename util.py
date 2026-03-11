@@ -13,6 +13,8 @@ def pdf_to_text(path): #convert PDF to text
 
 def get_db_connection():
     return psycopg2.connect( #defaults for local testing
+        #TODO: PLEASE REMOVE BUT THIS IS JUST FOR COPYING AND PASTING:
+        #$env:DB='citvexdb';$env:DB_UN='citvex';$env:DB_PW='vexrobotics';
         host="drhscit.org",
         database=os.environ['DB'],
         user=os.environ['DB_UN'],
