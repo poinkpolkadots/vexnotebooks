@@ -3,29 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/styles.css"> 
+    <link rel="stylesheet" href="static/styles.css"> 
     <title>VEX Robotics Engineering Notebook AI</title>
 </head>
 <body class="home-body">
     <!--Navigation bar at the top of the screen-->
     <div class="nav-bar">
-        <a href="home.html">Home</a>
+        <a href="home.html" class="active"> Home</a>
         <a href="upload.html">Upload</a>
         <a href="catalog.html">Catalog</a>
     </div>
 
-    <div class="logo-div">
-        <img class="vex-logo" alt="VEX Robotics logo" src="../graphics/VEX-Robotics_Full-Color-1.png">
-    </div>
+    <div class="home-wrap">
 
-    <div class="home-buttons">
-        <div>
-            <button class="upload-button" onclick="window.location.href='upload.html'">Upload</button>
+        <div class="home-split-left">
+            <div class="logo-div">
+                <img class="vex-logo" alt="VEX Robotics logo" src="static/graphics/VEX-Robotics_Full-Color-1.png">
+            </div>
         </div>
-        <div>
-            <button class="catalog-button" onclick="window.location.href='catalog.html'">Catalog</button>
+    
+        <div class="home-split-right">
+            <div class="home-buttons">
+                <div>
+                    <button class="upload-button" onclick="window.location.href='upload.html'">Upload</button>
+                </div>
+                <div>
+                    <button class="catalog-button" onclick="window.location.href='catalog.html'">Catalog</button>
+                </div>
+            </div>
         </div>
+
     </div>
+    
     
 </body>
 </html>
