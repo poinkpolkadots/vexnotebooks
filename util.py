@@ -1,12 +1,12 @@
 import os, shutil, psycopg2, uuid
 from werkzeug.utils import secure_filename
 from llama_parse import LlamaParse
-from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, StorageContext, load_index_from_storage, Settings, PromptTemplate
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, StorageContext, load_index_from_storage, Settings, PromptTemplate, get_response_synthesizer
 from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.core.node_parser import MarkdownNodeParser
-from llama_index.core.node_parser import HierarchicalNodeParser, get_leaf_nodes
-from llama_index.core.retrievers import RecursiveRetriever
+from llama_index.core.node_parser import HierarchicalNodeParser
+from llama_index.core.retrievers import RecursiveRetriever, AutoMergingRetriever
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.postprocessor import LLMRerank
 
@@ -16,7 +16,7 @@ STORAGE = os.path.join(os.getcwd(), "vexnotebooks") #storage path on the machine
 
 #reminder to pull both models `ollama pull [ model ]`
 Settings.llm = Ollama(
-    model="llama3.2", 
+    model="qwen2.5:32b", #mixtral, llama3.1:70b
     request_timeout=300.0, 
     context_window=32768,
     additional_kwargs={"num_ctx" : 32768}
@@ -25,8 +25,8 @@ Settings.embed_model = OllamaEmbedding(
     model_name="nomic-embed-text",
     additional_kwargs={"num_ctx" : 8192}
 ) 
-Settings.chunk_size = 512
-Settings.chunk_overlap = 50
+Settings.chunk_size = 1200
+Settings.chunk_overlap = 150
 
 splitter = MarkdownNodeParser()
 
@@ -81,22 +81,39 @@ def upload_pdfs(list):
 
     parser = LlamaParse(
         result_type="markdown",
+        auto_mode=True,
         user_prompt=(
-            "This is a VEX Robotics Engineering Notebook."
-            "Focus on capturing:"
-            "- Hand-written dates and page numbers (usually at the top or bottom corner)."
-            "- Pros/Cons tables and comparison charts."
-            "- Test logs and data tables."
-            "- Captions under drawings/images describing robot subsystems."
+            "This document is a VEX Robotics Engineering Notebook. "
+            "Extract all engineering documentation clearly."
         ),
         parsing_instruction=(
-            "This is a high-stakes VEX Robotics Engineering Notebook. "
-            "Every handwritten note, page number, and date is critical. "
-            "If you see a table, reconstruct it perfectly in Markdown. "
-            "If you see a drawing, describe it in detail as text."
+            "This is a VEX Robotics Engineering Notebook used in competition judging.\n\n"
+            
+            "IMPORTANT RULES:\n"
+            "1. Preserve page numbers and place them as markdown headings like:\n"
+            "   ### Page X\n\n"
+            
+            "2. Preserve all dates exactly as written.\n\n"
+            
+            "3. If you see tables (test logs, comparison charts, scoring tables), "
+            "reconstruct them perfectly in markdown table format.\n\n"
+            
+            "4. If you see drawings, diagrams, or robot sketches, describe them "
+            "in detail including labeled parts and mechanisms.\n\n"
+            
+            "5. Preserve section headings such as:\n"
+            "- Brainstorming\n"
+            "- Design Ideas\n"
+            "- Testing\n"
+            "- Iteration\n"
+            "- Match Strategy\n\n"
+            
+            "6. Do NOT summarize. Extract the notebook content as faithfully as possible.\n\n"
+            
+            "7. Keep engineering notes, bullet points, and captions exactly as written."
         )
     )
-    node_parser = HierarchicalNodeParser.from_defaults(chunk_sizes=[2048, 1024, 512])
+    node_parser = HierarchicalNodeParser.from_defaults(chunk_sizes=[4096, 1024])
 
     for file in list: #for each pdf to upload,
         name = secure_filename(f"{str(uuid.uuid4())[:4]}_{file.filename}") #generate a unique name
@@ -104,10 +121,12 @@ def upload_pdfs(list):
         file.save(pdf_path) #save the pdf to the path
         idx_path = os.path.join(f"{STORAGE}/idx", name) #generate the path to save the index
         os.makedirs(idx_path, exist_ok=True) #make the directory for the index
-        
         documents = SimpleDirectoryReader(input_files=[pdf_path], file_extractor={".pdf": parser}).load_data()
+        for d in documents:
+            d.metadata["notebook"] = name
         nodes = node_parser.get_nodes_from_documents(documents)
-
+        for node in nodes:
+            node.metadata["notebook"] = name
         idx = VectorStoreIndex(nodes) #create the index from the pdf
         idx.storage_context.persist(persist_dir=idx_path) #save the index to the path
         cur.execute("INSERT INTO registry (name, pdf_path, idx_path) VALUES (%s, %s, %s)", (name, pdf_path, idx_path)) #add the name and paths to the registry
@@ -137,49 +156,42 @@ def get_idx(name):
 
 def query(name, query):
     idx = get_idx(name)
-    all_nodes = list(idx.docstore.docs.values())
-
-    retriever = RecursiveRetriever(
-        "vector",
-        retriever_dict={"vector":idx.as_retriever(similarity_top_k=60)},
-        node_dict={node.node_id:node for node in all_nodes},
+    retriever = AutoMergingRetriever(
+        idx.as_retriever(similarity_top_k=80),
+        idx.storage_context,
         verbose=True
     )
-
-    rank = LLMRerank(top_n=20, model="llama3.2")
-
     engine = RetrieverQueryEngine.from_args(
         retriever,
+        #node_postprocessors=[LLMRerank(top_n=50)],
+        response_mode="refine",
         streaming=True,
-        node_postprocessors=[rank],
-        response_mode="tree_summarize",
-        text_qa_template=PromptTemplate(
-            "Context information is below.\n"
-            "---------------------\n"
-            "{context_str}\n"
-            "---------------------\n"
-            "You are an expert VEX Robotics Judge. Your task is to provide an EXTREMELY DETAILED "
-            "technical audit of the team's engineering process based ONLY on the context provided.\n\n"
-            
-            "RULES:\n"
-            "1. LIST EVERY design option mentioned (e.g., Ball Bag, Elevator, Magazine, etc.).\n"
-            "2. For every design, list the specific PROS and CONS mentioned in the text.\n"
-            "3. Describe every TEST conducted, including the DATE and the RESULT (e.g., 6/10 rings success).\n"
-            "4. Identify every FAILURE or ISSUE and describe the exact SOLUTION the team implemented.\n"
-            "5. YOU MUST CITE THE PAGE NUMBER for every single fact you provide (e.g., [Page 12]).\n"
-            "6. Use bullet points for readability but do not sacrifice detail.\n\n"
+        text_qa_template=PromptTemplate("""
+            You are a VEX Robotics Engineering Notebook judge.
 
-            "### INSTRUCTIONS FOR TECHNICAL AUDIT:\n"
-            "1. EXTRACT ALL DATES: Scan the context for every date mentioned.\n"
-            "2. TRACK EVOLUTION: Look for phrases like 'Instead of', 'We changed', or 'Version 2'.\n"
-            "3. DATA RECOVERY: If you find a test result (e.g., 5/5 or 60%), you MUST include it.\n"
-            "4. NO SUMMARIES: Do not say 'The team tested the robot.' Say 'On 12/23, the team "
-            "tested the intake and achieved a 6/10 success rate due to entrance clogging.'\n"
-            "5. SOURCE EVERYTHING: Every bullet point MUST end with [Page X].\n"
+            Question:
+            {query_str}
 
-            "Query: {query_str}\n"
-            "Judge's Detailed Technical Assessment:"
-        )
+            Analyze the notebook and extract relevant evidence.
+
+            If the information exists, include:
+
+            • Design brainstorming or rejected ideas
+            • Design selection reasoning
+            • Testing data or results
+            • Mechanical iterations
+            • Timeline of development
+
+            Rules:
+            - Cite notebook pages as [Page X]
+            - Reproduce tables if present
+            - Quote key design notes when helpful
+
+            Context:
+            {context_str}
+
+            Answer:
+        """)
     )
     return engine.query(query)
 
