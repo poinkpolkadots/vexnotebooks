@@ -1,10 +1,18 @@
 /* yay css so fun */
 
+html {
+    height: 100%;
+}
+
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
+    font-weight: bold;
     background-color: #a5a5a5;
     margin: 0;
     padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* for the nav bar (general) */
@@ -79,6 +87,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    flex: 1;
+    min-height: calc(100vh - 150px);
 }
 
 .dashboard-box {
@@ -181,14 +191,15 @@ th {
 }
 
 .split {
-    height: 100%;
+    min-height: calc(100vh - 70px);
     display: flex;
-    position: fixed;
+    position: relative;
     z-index: 1;
     top: 0;
     overflow-x: hidden;
-    margin-top: 70px;
+    margin-top: 0;
     margin-left: 30px;
+    padding-top: 20px;
   }
   
   /* Control the left side- cite W3 schools for code */
@@ -225,8 +236,8 @@ th {
 
 .vl { /*from W3 schools*/
     border-left: 6px solid black;
-    height: 515px;
-    position: absolute;
+    height: calc(100vh - 150px);
+    position: relative;
     padding-top: 50px;
     left: 58%;
 }
@@ -270,10 +281,6 @@ th {
     padding-bottom: 8px;
 }
 
-.notebook-name {
-    vertical-align:50%;
-}
-
 .notebook-name-uploadpage {
     text-decoration: underline;
     padding: 1px;
@@ -290,6 +297,7 @@ th {
     display: flex;
     flex-direction: row;
     width: 100%;
+    min-height: calc(100vh - 70px);
     overflow: hidden;
     background-image: url('graphics/kids_playing_with_robot.png');
     background-position: right;
@@ -304,7 +312,7 @@ th {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 567px;
+    flex: 1;
     border-top-right-radius: 50px;
     border-bottom-right-radius: 50px;
 }
@@ -316,10 +324,6 @@ th {
     justify-self: center;
     align-items: center;
     min-height: 78px;
-}
-
-.vex-logo {
-    width: 100%;
 }
 
 .home-split-right {
@@ -362,5 +366,24 @@ th {
     border: 5px solid white;
     border-radius: 10px;
     cursor: pointer;
+}
+
+.upload-row {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    min-height: calc(100vh - 70px);
+    padding: 20px 40px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.upload-section, .status-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
