@@ -16,10 +16,13 @@ STORAGE = os.path.join(os.getcwd(), "vexnotebooks") #storage path on the machine
 
 #reminder to pull both models `ollama pull [ model ]`
 Settings.llm = Ollama(
-    model="qwen2.5:32b", #mixtral, llama3.1:70b
-    request_timeout=300.0, 
+    model="qwen2.5:32b",
+    request_timeout=600,
     context_window=32768,
-    additional_kwargs={"num_ctx" : 32768}
+    additional_kwargs={
+        "num_ctx": 32768,
+        "temperature": 0.1
+    }
 )
 Settings.embed_model = OllamaEmbedding(
     model_name="nomic-embed-text",
@@ -83,34 +86,40 @@ def upload_pdfs(list):
         result_type="markdown",
         auto_mode=True,
         user_prompt=(
-            "This document is a VEX Robotics Engineering Notebook. "
-            "Extract all engineering documentation clearly."
+            "This document is a VEX Robotics Engineering Notebook from team 97265A (Jagbots). "
+            "It contains chronological engineering notes, meeting logs, and robot development."
         ),
         parsing_instruction=(
-            "This is a VEX Robotics Engineering Notebook used in competition judging.\n\n"
-            
-            "IMPORTANT RULES:\n"
-            "1. Preserve page numbers and place them as markdown headings like:\n"
+            "This is a structured engineering notebook used for robotics competition judging.\n\n"
+
+            "DOCUMENT STRUCTURE:\n"
+            "- Pages contain dated engineering entries.\n"
+            "- Many sections are TEAM MEETING NOTES.\n"
+            "- Some pages contain brainstorming, design selection, testing, or code.\n\n"
+
+            "IMPORTANT EXTRACTION RULES:\n"
+
+            "1. Always preserve page numbers as headings like:\n"
             "   ### Page X\n\n"
-            
-            "2. Preserve all dates exactly as written.\n\n"
-            
-            "3. If you see tables (test logs, comparison charts, scoring tables), "
-            "reconstruct them perfectly in markdown table format.\n\n"
-            
-            "4. If you see drawings, diagrams, or robot sketches, describe them "
-            "in detail including labeled parts and mechanisms.\n\n"
-            
-            "5. Preserve section headings such as:\n"
-            "- Brainstorming\n"
-            "- Design Ideas\n"
-            "- Testing\n"
-            "- Iteration\n"
-            "- Match Strategy\n\n"
-            
-            "6. Do NOT summarize. Extract the notebook content as faithfully as possible.\n\n"
-            
-            "7. Keep engineering notes, bullet points, and captions exactly as written."
+
+            "2. Preserve dates exactly as written (example: 9/1/25, 12/16/25).\n\n"
+
+            "3. Preserve section titles such as:\n"
+            "- Brainstorming Solutions\n"
+            "- Selecting Designs\n"
+            "- Testing Solutions\n"
+            "- Identify the Problem\n"
+            "- Team Meeting Notes\n"
+            "- Code\n\n"
+
+            "4. If you see a meeting log, extract it as bullet points.\n\n"
+
+            "5. If you see a test log or results, reconstruct it as a markdown table.\n\n"
+
+            "6. If the page contains robot mechanisms (intake, drivetrain, etc.), "
+            "describe the design and components clearly.\n\n"
+
+            "7. DO NOT summarize. Preserve the engineering notes exactly."
         )
     )
     node_parser = HierarchicalNodeParser.from_defaults(chunk_sizes=[4096, 1024])
@@ -167,30 +176,32 @@ def query(name, query):
         response_mode="refine",
         streaming=True,
         text_qa_template=PromptTemplate("""
-            You are a VEX Robotics Engineering Notebook judge.
+            You are a VEX Robotics Engineering Notebook judge evaluating Team 97265A (Jagbots).
 
             Question:
             {query_str}
 
-            Analyze the notebook and extract relevant evidence.
+            Analyze the notebook and extract evidence describing the team's engineering process.
 
-            If the information exists, include:
+            Focus especially on:
 
-            • Design brainstorming or rejected ideas
-            • Design selection reasoning
-            • Testing data or results
-            • Mechanical iterations
-            • Timeline of development
+            • Brainstorming ideas and rejected concepts
+            • Design decisions and why designs were selected
+            • Mechanical subsystems (intake, drivetrain, etc.)
+            • Testing results and experiments
+            • Meeting discussions and engineering decisions
+            • Chronological development of the robot
 
             Rules:
-            - Cite notebook pages as [Page X]
-            - Reproduce tables if present
-            - Quote key design notes when helpful
+            - Cite notebook pages like [Page X]
+            - Quote important engineering notes when helpful
+            - Reproduce tables if test data appears
+            - Reconstruct the timeline of development when possible
 
             Context:
             {context_str}
 
-            Answer:
+            Engineering Analysis:
         """)
     )
     return engine.query(query)
