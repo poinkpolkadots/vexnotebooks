@@ -1,16 +1,15 @@
 import os, shutil, psycopg2, uuid
 from werkzeug.utils import secure_filename
-from llama_parse import LlamaParse
-from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, StorageContext, load_index_from_storage, Settings, PromptTemplate, get_response_synthesizer
+from llama_index.core import VectorStoreIndex, StorageContext, load_index_from_storage, Settings, PromptTemplate
 from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.core.node_parser import MarkdownNodeParser
 from llama_index.core.node_parser import HierarchicalNodeParser
-from llama_index.core.retrievers import RecursiveRetriever, AutoMergingRetriever
+from llama_index.core.retrievers import RecursiveRetriever
 from llama_index.core.query_engine import RetrieverQueryEngine
-from llama_index.core.postprocessor import LLMRerank
+from llama_index.readers.file import PyMuPDFReader
 
-os.environ["LLAMA_CLOUD_API_KEY"] = "llx-2Ejopk7UhAlQFzhvvCKy4zh3yxs7qbqiEl2yVXzFxu9ZcnbF"
+#os.environ["LLAMA_CLOUD_API_KEY"] = "llx-2Ejopk7UhAlQFzhvvCKy4zh3yxs7qbqiEl2yVXzFxu9ZcnbF"
 
 STORAGE = os.path.join(os.getcwd(), "vexnotebooks") #storage path on the machine the script runs on
 
@@ -82,46 +81,50 @@ def upload_pdfs(list):
     con = get_db_connection()
     cur = con.cursor()
 
-    parser = LlamaParse(
-        result_type="markdown",
-        auto_mode=True,
-        user_prompt=(
-            "This document is a VEX Robotics Engineering Notebook from team 97265A (Jagbots). "
-            "It contains chronological engineering notes, meeting logs, and robot development."
-        ),
-        parsing_instruction=(
-            "This is a structured engineering notebook used for robotics competition judging.\n\n"
+    reader = PyMuPDFReader()
 
-            "DOCUMENT STRUCTURE:\n"
-            "- Pages contain dated engineering entries.\n"
-            "- Many sections are TEAM MEETING NOTES.\n"
-            "- Some pages contain brainstorming, design selection, testing, or code.\n\n"
+    #reader = DoclingReader()
 
-            "IMPORTANT EXTRACTION RULES:\n"
-
-            "1. Always preserve page numbers as headings like:\n"
-            "   ### Page X\n\n"
-
-            "2. Preserve dates exactly as written (example: 9/1/25, 12/16/25).\n\n"
-
-            "3. Preserve section titles such as:\n"
-            "- Brainstorming Solutions\n"
-            "- Selecting Designs\n"
-            "- Testing Solutions\n"
-            "- Identify the Problem\n"
-            "- Team Meeting Notes\n"
-            "- Code\n\n"
-
-            "4. If you see a meeting log, extract it as bullet points.\n\n"
-
-            "5. If you see a test log or results, reconstruct it as a markdown table.\n\n"
-
-            "6. If the page contains robot mechanisms (intake, drivetrain, etc.), "
-            "describe the design and components clearly.\n\n"
-
-            "7. DO NOT summarize. Preserve the engineering notes exactly."
-        )
-    )
+    #parser = LlamaParse(
+    #    result_type="markdown",
+    #    auto_mode=True,
+    #    user_prompt=(
+    #        "This document is a VEX Robotics Engineering Notebook from team 97265A (Jagbots). "
+    #        "It contains chronological engineering notes, meeting logs, and robot development."
+    #    ),
+    #    parsing_instruction=(
+    #        "This is a structured engineering notebook used for robotics competition judging.\n\n"
+    #
+    #       "DOCUMENT STRUCTURE:\n"
+    #        "- Pages contain dated engineering entries.\n"
+    #        "- Many sections are TEAM MEETING NOTES.\n"
+    #        "- Some pages contain brainstorming, design selection, testing, or code.\n\n"
+    #
+    #        "IMPORTANT EXTRACTION RULES:\n"
+    #
+    #        "1. Always preserve page numbers as headings like:\n"
+    #        "   ### Page X\n\n"
+    #
+    #        "2. Preserve dates exactly as written (example: 9/1/25, 12/16/25).\n\n"
+    #
+    #        "3. Preserve section titles such as:\n"
+    #        "- Brainstorming Solutions\n"
+    #        "- Selecting Designs\n"
+    #        "- Testing Solutions\n"
+    #        "- Identify the Problem\n"
+    #        "- Team Meeting Notes\n"
+    #        "- Code\n\n"
+    #
+    #        "4. If you see a meeting log, extract it as bullet points.\n\n"
+    #
+    #        "5. If you see a test log or results, reconstruct it as a markdown table.\n\n"
+    #
+    #        "6. If the page contains robot mechanisms (intake, drivetrain, etc.), "
+    #        "describe the design and components clearly.\n\n"
+    #
+    #        "7. DO NOT summarize. Preserve the engineering notes exactly."
+    #    )
+    #)
     node_parser = HierarchicalNodeParser.from_defaults(chunk_sizes=[4096, 1024])
 
     for file in list: #for each pdf to upload,
@@ -130,7 +133,7 @@ def upload_pdfs(list):
         file.save(pdf_path) #save the pdf to the path
         idx_path = os.path.join(f"{STORAGE}/idx", name) #generate the path to save the index
         os.makedirs(idx_path, exist_ok=True) #make the directory for the index
-        documents = SimpleDirectoryReader(input_files=[pdf_path], file_extractor={".pdf": parser}).load_data()
+        documents = documents = reader.load_data(pdf_path) #SimpleDirectoryReader(input_files=[pdf_path], file_extractor={".pdf": parser}).load_data()
         for d in documents:
             d.metadata["notebook"] = name
         nodes = node_parser.get_nodes_from_documents(documents)
@@ -165,9 +168,15 @@ def get_idx(name):
 
 def query(name, query):
     idx = get_idx(name)
-    retriever = AutoMergingRetriever(
-        idx.as_retriever(similarity_top_k=80),
-        idx.storage_context,
+    #retriever = AutoMergingRetriever(
+    #    idx.as_retriever(similarity_top_k=80),
+    #    idx.storage_context,
+    #    verbose=True
+    #)
+    retriever = RecursiveRetriever(
+        "vector",
+        retriever_dict={"vector" : idx.as_retriever(similarity_top_k=80)},
+        node_dict={node.node_id: node for node in list(idx.docstore.docs.values())},
         verbose=True
     )
     engine = RetrieverQueryEngine.from_args(
@@ -216,7 +225,7 @@ if __name__ == "__main__":
     print('resetted, now uploading')
     upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
     print('uploaded, now querying')
-    res = query(get_pdfs()[0][0], "tell me their development process for the intake")
+    res = query(get_pdfs()[0][0], "what did Maxwell contribute to the team's engineering process?")
     print('queried, now printing')
     for text in res.response_gen: 
         print(text, end="", flush=True)
