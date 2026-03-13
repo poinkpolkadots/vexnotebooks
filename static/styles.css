@@ -270,6 +270,10 @@ th {
     padding-bottom: 8px;
 }
 
+.notebook-name {
+    vertical-align:50%;
+}
+
 .notebook-name-uploadpage {
     text-decoration: underline;
     padding: 1px;
@@ -312,6 +316,10 @@ th {
     justify-self: center;
     align-items: center;
     min-height: 78px;
+}
+
+.vex-logo {
+    width: 100%;
 }
 
 .home-split-right {
