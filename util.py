@@ -57,6 +57,7 @@ def reset():
             "name VARCHAR(255) UNIQUE NOT NULL," #unique name for the pdf
             "pdf_path TEXT NOT NULL," #path to the pdf file
             "idx_path TEXT NOT NULL," #path to the index file
+            "res_path TEXT," #path to the results file
             "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP" #timestamp of when the pdf was added
         ");"
     )
@@ -141,7 +142,12 @@ def upload_pdfs(list):
             node.metadata["notebook"] = name
         idx = VectorStoreIndex(nodes) #create the index from the pdf
         idx.storage_context.persist(persist_dir=idx_path) #save the index to the path
-        cur.execute("INSERT INTO registry (name, pdf_path, idx_path) VALUES (%s, %s, %s)", (name, pdf_path, idx_path)) #add the name and paths to the registry
+        
+        res_path = os.path.join(f"{STORAGE}/res", f"{name}.md") #generate the path to save the results
+        with open(res_path, "w") as f: #create an empty file for the results
+            f.write("")
+        
+        cur.execute("INSERT INTO registry (name, pdf_path, idx_path, res_path) VALUES (%s, %s, %s, %s)", (name, pdf_path, idx_path, res_path)) #add the name and paths to the registry
     con.commit()
     cur.close()
     con.close()
@@ -214,6 +220,27 @@ def query(name, query):
         """)
     )
     return engine.query(query)
+
+def set_res(name, res):
+    con = get_db_connection()
+    cur = con.cursor()
+    cur.execute("SELECT res_path FROM registry WHERE name = %s", (name,)) #get the path of the results file to save to
+    path = cur.fetchone()[0]
+    with open(path, "w") as f: #save the results to that path
+        f.write(res)
+    cur.close()
+    con.close()
+
+def get_res(name):
+    con = get_db_connection()
+    cur = con.cursor()
+    cur.execute("SELECT res_path FROM registry WHERE name = %s", (name,)) #get the path of the results file to read from
+    path = cur.fetchone()[0]
+    with open(path, "r") as f: #read the results from that path and return them
+        res = f.read()
+    cur.close()
+    con.close()
+    return res
 
 if __name__ == "__main__":
     os.environ['DB'] = 'citvexdb'
