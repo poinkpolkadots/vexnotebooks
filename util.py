@@ -32,13 +32,6 @@ Settings.chunk_overlap = 150
 
 splitter = MarkdownNodeParser()
 
-class LFW:
-    def __init__(self, local_path):
-        self.local_path = local_path
-        self.filename = os.path.basename(local_path)
-    def save(self, destination):
-        shutil.copyfile(self.local_path, destination)
-
 def get_db_connection():
     return psycopg2.connect(
         host="drhscit.org",
@@ -57,9 +50,9 @@ def reset():
             "name VARCHAR(255) UNIQUE NOT NULL," #unique name for the pdf
             "pdf_path TEXT NOT NULL," #path to the pdf file
             "idx_path TEXT NOT NULL," #path to the index file
+            "res_path TEXT NOT NULL," #path to the results file
             "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP" #timestamp of when the pdf was added
-        ");"
-    )
+        ");")
     con.commit()
     cur.close()
     con.close()
@@ -81,11 +74,8 @@ def get_pdfs():
 def upload_pdfs(list):
     con = get_db_connection()
     cur = con.cursor()
-
     reader = PyMuPDFReader()
-
     node_parser = HierarchicalNodeParser.from_defaults(chunk_sizes=[4096, 1024])
-
     for file in list: #for each pdf to upload,
         name = secure_filename(f"{str(uuid.uuid4())[:4]}_{file.filename}") #generate a unique name
         pdf_path = os.path.join(f"{STORAGE}/pdf", name) #generate the path to save the pdf
@@ -103,7 +93,6 @@ def upload_pdfs(list):
         res_path = os.path.join(f"{STORAGE}/res", f"{name}.md") #generate the path to save the results
         with open(res_path, "w") as f: #create an empty file for the results
             f.write("")
-
         cur.execute("INSERT INTO registry (name, pdf_path, idx_path, res_path) VALUES (%s, %s, %s, %s)", (name, pdf_path, idx_path, res_path)) #add the name and paths to the registry
     con.commit()
     cur.close()
@@ -112,10 +101,14 @@ def upload_pdfs(list):
 def delete_pdf(name):
     con = get_db_connection()
     cur = con.cursor()
-    cur.execute("SELECT pdf_path FROM registry WHERE name = %s", (name,)) #get the path of the pdf to delete
-    path = cur.fetchone()[0]
-    os.remove(path) #remove the pdf from that path
-    cur.execute("DELETE FROM registry WHERE name = %s", (name,)) #remove the pdf from the registry
+    cur.execute("DELETE FROM registry WHERE name = %s RETURNING (pdf_path, idx_path, res_path)", (name,)) #remove the pdf from the registry
+    pdf_path, idx_path, res_path = cur.fetchone() #get the paths to the pdf, index, and results file
+    if os.path.exists(pdf_path): #remove the pdf file
+        os.remove(pdf_path)
+    if os.path.exists(idx_path): #remove the index directory
+        shutil.rmtree(idx_path)
+    if os.path.exists(res_path): #remove the results file
+        os.remove(res_path)
     con.commit()
     cur.close()
     con.close()
@@ -131,15 +124,13 @@ def get_idx(name):
 
 def query(name, query):
     idx = get_idx(name)
-
-    retriever = RecursiveRetriever( #this may be the bottleneck?
-        "vector",
-        retriever_dict={"vector" : idx.as_retriever(similarity_top_k=20)}, #originally 80
-        node_dict={node.node_id: node for node in list(idx.docstore.docs.values())},
-        verbose=True
-    )
-    engine = RetrieverQueryEngine.from_args(
-        retriever,
+    return RetrieverQueryEngine.from_args(
+        RecursiveRetriever( #this may be the bottleneck?
+            "vector",
+            retriever_dict={"vector" : idx.as_retriever(similarity_top_k=20)}, #originally 80
+            node_dict={node.node_id: node for node in list(idx.docstore.docs.values())},
+            verbose=True
+        ),
         response_mode="refine",
         streaming=True,
         text_qa_template=PromptTemplate("""
@@ -170,8 +161,35 @@ def query(name, query):
 
             Engineering Analysis:
         """)
-    )
-    return engine.query(query)
+    ).query(query)
+
+def set_res(name, res):
+    con = get_db_connection()
+    cur = con.cursor()
+    cur.execute("SELECT res_path FROM registry WHERE name = %s", (name,)) #get the path of the results file to save to
+    path = cur.fetchone()[0]
+    with open(path, "w") as f: #save the results to that path
+        f.write(res)
+    cur.close()
+    con.close()
+
+def get_res(name):
+    con = get_db_connection()
+    cur = con.cursor()
+    cur.execute("SELECT res_path FROM registry WHERE name = %s", (name,)) #get the path of the results file to read from
+    path = cur.fetchone()[0]
+    with open(path, "r") as f: #read the results from that path and return them
+        res = f.read()
+    cur.close()
+    con.close()
+    return res
+
+class LFW: #NOTE only for testing purposes (local file wrapper thingy)
+    def __init__(self, local_path):
+        self.local_path = local_path
+        self.filename = os.path.basename(local_path)
+    def save(self, destination):
+        shutil.copyfile(self.local_path, destination)
 
 if __name__ == "__main__":
     os.environ['DB'] = 'citvexdb'
