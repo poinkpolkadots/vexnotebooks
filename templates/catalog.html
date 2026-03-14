@@ -1,31 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/styles.css">
-    <title>Notebook Catalog</title>
-</head>
-<body>
-    <div class="nav-bar">
-        <a href="home.html">Home</a>
-        <a href="upload.html">Upload</a>
-        <a href="catalog.html" class="active">Catalog</a>
-    </div>
-
+{% extends 'base.html' %}
+{% block title %}Catalog{% endblock %}
+{% block content %}
     <p class="catalog-instruction">Select a notebook to view information:</p>
-
     <div class="catalog-grid">
-        
-        <a href="notebookinfo.html" class="notebook-card">
+        <a href="{{ url_for('notebookinfo') }}" class="notebook-card">
             <div class="notebook-overview">
                 <p class="notebook-name">Team3Notebook.pdf</p>
                 <div class="thumbnail-placeholder">
-                    <img class="notebook-thumbnail" src="sample_thumbnail.png" alt="PDF">
+                    <img class="notebook-thumbnail" src="/static/graphics/sample_thumbnail.png" alt="PDF">
                 </div>
             </div>
         </a>
-
     </div>
-</body>
-</html>
+{% endblock %}

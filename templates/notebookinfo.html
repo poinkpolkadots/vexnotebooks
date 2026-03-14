@@ -1,27 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/styles.css">
-    <title>Notebook Details</title>
-</head>
-<body>
-    <div class="nav-bar">
-        <a href="home.html">Home</a>
-        <a href="upload.html">Upload</a>
-        <a href="catalog.html" class="active">Catalog</a>
-    </div>
-
+{% extends 'base.html' %}
+{% block title %}Notebook Info{% endblock %}
+{% block content %}
     <div class="info-header">
         <p class="notebook-title">Team3Notebook.pdf</p>
         <div class="score-pill">80/100</div>
         <button class="download-btn">
             Download PDF 
-            <img alt="down" src="graphics/download symbol.png" class="download-icon"> <!--dont have the png so it doesnt show up rn-->
+            <img alt="down" src="/static/graphics/download symbol.png" class="download-icon"> <!--dont have the png so it doesnt show up rn-->
         </button>
     </div>
-
     <div class="dashboard-container">
         
         <div class="dashboard-top-row">
@@ -110,5 +97,4 @@
             </table>
         </div>
     </div>
-</body>
-</html>
+{% endblock %}
