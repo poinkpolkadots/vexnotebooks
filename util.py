@@ -67,7 +67,8 @@ def reset():
     if os.path.exists(STORAGE): #remove the directory if it exists
         shutil.rmtree(STORAGE)
     os.makedirs(os.path.join(STORAGE, "pdf"), exist_ok=True) #create the directory for storing pdfs
-    os.makedirs(os.path.join(STORAGE, "idx"), exist_ok=True) #create the directory for storing the AI's results
+    os.makedirs(os.path.join(STORAGE, "idx"), exist_ok=True) #create the directory for storing the AI's vector stores
+    os.makedirs(os.path.join(STORAGE, "res"), exist_ok=True) #create the directory for storing the AI's responses
 
 def get_pdfs():
     con = get_db_connection()
@@ -142,11 +143,10 @@ def upload_pdfs(list):
             node.metadata["notebook"] = name
         idx = VectorStoreIndex(nodes) #create the index from the pdf
         idx.storage_context.persist(persist_dir=idx_path) #save the index to the path
-        
         res_path = os.path.join(f"{STORAGE}/res", f"{name}.md") #generate the path to save the results
         with open(res_path, "w") as f: #create an empty file for the results
             f.write("")
-        
+
         cur.execute("INSERT INTO registry (name, pdf_path, idx_path, res_path) VALUES (%s, %s, %s, %s)", (name, pdf_path, idx_path, res_path)) #add the name and paths to the registry
     con.commit()
     cur.close()
@@ -181,14 +181,14 @@ def query(name, query):
     #)
     retriever = RecursiveRetriever(
         "vector",
-        retriever_dict={"vector" : idx.as_retriever(similarity_top_k=80)},
+        retriever_dict={"vector" : idx.as_retriever(similarity_top_k=20)}, #originally 80
         node_dict={node.node_id: node for node in list(idx.docstore.docs.values())},
         verbose=True
     )
     engine = RetrieverQueryEngine.from_args(
         retriever,
         #node_postprocessors=[LLMRerank(top_n=50)],
-        response_mode="refine",
+        response_mode="tree_summarize",
         streaming=True,
         text_qa_template=PromptTemplate("""
             You are a VEX Robotics Engineering Notebook judge evaluating Team 97265A (Jagbots).
@@ -247,10 +247,10 @@ if __name__ == "__main__":
     os.environ['DB_UN'] = 'citvex'
     os.environ['DB_PW'] = 'vexrobotics'
 
-    print('starting, now resetting')
-    reset()
-    print('resetted, now uploading')
-    upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
+    #print('starting, now resetting')
+    #reset()
+    #print('resetted, now uploading')
+    #upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
     print('uploaded, now querying')
     res = query(get_pdfs()[0][0], "what did Maxwell contribute to the team's engineering process?")
     print('queried, now printing')
