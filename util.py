@@ -1,4 +1,4 @@
-import os, shutil, psycopg2, uuid
+import os, shutil, psycopg2
 from werkzeug.utils import secure_filename
 from llama_index.core import VectorStoreIndex, StorageContext, load_index_from_storage, Settings, PromptTemplate
 from llama_index.llms.ollama import Ollama
@@ -46,11 +46,11 @@ def reset():
     cur.execute(
         "DROP TABLE IF EXISTS registry;" #remove the existing registry
         "CREATE TABLE registry (" #make a new one
-            "id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY," #id of the pdf, may not need this since the name could act as a primary key
-            "name VARCHAR(255) UNIQUE NOT NULL," #unique name for the pdf
-            "pdf_path TEXT NOT NULL," #path to the pdf file
-            "idx_path TEXT NOT NULL," #path to the index file
-            "res_path TEXT NOT NULL," #path to the results file
+            "id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY," #id of the pdf
+            "name VARCHAR(255) NOT NULL," #name for the pdf
+            "pdf_path TEXT," #path to the pdf file
+            "idx_path TEXT," #path to the index file
+            "res_path TEXT," #path to the results file
             "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP" #timestamp of when the pdf was added
         ");")
     con.commit()
@@ -65,7 +65,7 @@ def reset():
 def get_pdfs():
     con = get_db_connection()
     cur = con.cursor()
-    cur.execute("SELECT name, timestamp FROM registry ORDER BY timestamp DESC;") #get the names and times added for each of the pdfs
+    cur.execute("SELECT id, name, timestamp FROM registry ORDER BY timestamp DESC;") #get the names and times added for each of the pdfs
     pdfs = cur.fetchall()
     cur.close()
     con.close()
@@ -77,31 +77,33 @@ def upload_pdfs(list):
     reader = PyMuPDFReader()
     node_parser = HierarchicalNodeParser.from_defaults(chunk_sizes=[4096, 1024])
     for file in list: #for each pdf to upload,
-        name = secure_filename(f"{str(uuid.uuid4())[:4]}_{file.filename}") #generate a unique name
-        pdf_path = os.path.join(f"{STORAGE}/pdf", name) #generate the path to save the pdf
+        cur.execute("INSERT INTO registry (name) VALUES (%s) RETURNING id", (file.filename,)) #add the name to the registry to generate an id
+        id = cur.fetchone()[0]
+        fname = secure_filename(f"{id}{file.filename}") #generate a unique name
+        pdf_path = os.path.join(f"{STORAGE}/pdf", fname) #generate the path to save the pdf
         file.save(pdf_path) #save the pdf to the path
-        idx_path = os.path.join(f"{STORAGE}/idx", name) #generate the path to save the index
+        idx_path = os.path.join(f"{STORAGE}/idx", fname) #generate the path to save the index
         os.makedirs(idx_path, exist_ok=True) #make the directory for the index
         documents = documents = reader.load_data(pdf_path)
         for d in documents:
-            d.metadata["notebook"] = name
+            d.metadata["notebook"] = fname
         nodes = node_parser.get_nodes_from_documents(documents)
         for node in nodes:
-            node.metadata["notebook"] = name
+            node.metadata["notebook"] = fname
         idx = VectorStoreIndex(nodes) #create the index from the pdf
         idx.storage_context.persist(persist_dir=idx_path) #save the index to the path
-        res_path = os.path.join(f"{STORAGE}/res", f"{name}.md") #generate the path to save the results
+        res_path = os.path.join(f"{STORAGE}/res", f"{fname}.md") #generate the path to save the results
         with open(res_path, "w") as f: #create an empty file for the results
             f.write("")
-        cur.execute("INSERT INTO registry (name, pdf_path, idx_path, res_path) VALUES (%s, %s, %s, %s)", (name, pdf_path, idx_path, res_path)) #add the name and paths to the registry
+        cur.execute("UPDATE registry SET pdf_path = %s, idx_path = %s, res_path = %s WHERE id = %s", (pdf_path, idx_path, res_path, id)) #add the name and paths to the registry
     con.commit()
     cur.close()
     con.close()
 
-def delete_pdf(name):
+def delete_pdf(id):
     con = get_db_connection()
     cur = con.cursor()
-    cur.execute("DELETE FROM registry WHERE name = %s RETURNING (pdf_path, idx_path, res_path)", (name,)) #remove the pdf from the registry
+    cur.execute("DELETE FROM registry WHERE id = %s RETURNING (pdf_path, idx_path, res_path)", (id,)) #remove the pdf from the registry
     pdf_path, idx_path, res_path = cur.fetchone() #get the paths to the pdf, index, and results file
     if os.path.exists(pdf_path): #remove the pdf file
         os.remove(pdf_path)
@@ -113,17 +115,17 @@ def delete_pdf(name):
     cur.close()
     con.close()
 
-def get_idx(name):
+def get_idx(id):
     con = get_db_connection()
     cur = con.cursor()
-    cur.execute("SELECT idx_path FROM registry WHERE name = %s", (name,)) #get the path of the index to load
-    IDX_PATH = cur.fetchone()[0]
+    cur.execute("SELECT idx_path FROM registry WHERE id = %s", (id,)) #get the path of the index to load
+    idx_path = cur.fetchone()[0]
     cur.close()
     con.close()
-    return load_index_from_storage(StorageContext.from_defaults(persist_dir=IDX_PATH)) #load the index from that path and return it
+    return load_index_from_storage(StorageContext.from_defaults(persist_dir=idx_path)) #load the index from that path and return it
 
-def query(name, query):
-    idx = get_idx(name)
+def query(id, query):
+    idx = get_idx(id)
     return RetrieverQueryEngine.from_args(
         RecursiveRetriever( #this may be the bottleneck?
             "vector",
@@ -131,7 +133,7 @@ def query(name, query):
             node_dict={node.node_id: node for node in list(idx.docstore.docs.values())},
             verbose=True
         ),
-        response_mode="refine",
+        response_mode="compact",
         streaming=True,
         text_qa_template=PromptTemplate("""
             You are a VEX Robotics Engineering Notebook judge evaluating Team 97265A (Jagbots).
@@ -163,20 +165,20 @@ def query(name, query):
         """)
     ).query(query)
 
-def set_res(name, res):
+def set_res(id, res):
     con = get_db_connection()
     cur = con.cursor()
-    cur.execute("SELECT res_path FROM registry WHERE name = %s", (name,)) #get the path of the results file to save to
+    cur.execute("SELECT res_path FROM registry WHERE id = %s", (id,)) #get the path of the results file to save to
     path = cur.fetchone()[0]
     with open(path, "w") as f: #save the results to that path
         f.write(res)
     cur.close()
     con.close()
 
-def get_res(name):
+def get_res(id):
     con = get_db_connection()
     cur = con.cursor()
-    cur.execute("SELECT res_path FROM registry WHERE name = %s", (name,)) #get the path of the results file to read from
+    cur.execute("SELECT res_path FROM registry WHERE id = %s", (id,)) #get the path of the results file to read from
     path = cur.fetchone()[0]
     with open(path, "r") as f: #read the results from that path and return them
         res = f.read()
