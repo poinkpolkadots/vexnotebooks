@@ -1,36 +1,46 @@
 import os, shutil, psycopg2
 from werkzeug.utils import secure_filename
+
 from llama_index.core import VectorStoreIndex, StorageContext, load_index_from_storage, Settings, PromptTemplate
 from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.ollama import OllamaEmbedding
-from llama_index.core.node_parser import MarkdownNodeParser
-from llama_index.core.node_parser import HierarchicalNodeParser
-from llama_index.core.retrievers import RecursiveRetriever
+from llama_index.core.node_parser import SimpleNodeParser
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.readers.file import PyMuPDFReader
 
-#os.environ["LLAMA_CLOUD_API_KEY"] = "llx-2Ejopk7UhAlQFzhvvCKy4zh3yxs7qbqiEl2yVXzFxu9ZcnbF"
-
 STORAGE = os.path.join(os.getcwd(), "vexnotebooks") #storage path on the machine the script runs on
+RUBRIC = '''
+    ### Section 1: Engineering Design Process
+    | Criteria | Expert (4-5 Points) | Proficient (2-3 Points) | Emerging (0-1 Points) |
+    | :--- | :--- | :--- | :--- |
+    | **Identify Problem / Design Goal(s)** | Clearly identifies the problem / design goal(s) in detail at the start of each design process cycle. This can include elements of game strategy, robot design, or programming, and should include a clear definition and justification of the design goal(s), criteria, and constraints. | Identifies the problem / design goal(s) at the start of each design cycle but is lacking details or justification. | Does not identify the problem/design goal(s) at the start of each design cycle. |
+    | **Brainstorm Solutions** | Explores several different solutions with explanation. Citations are provided for ideas that came from outside sources such as online videos or other teams. | Explores few solutions. Citations provided for ideas that came from outside sources. | Does not explore different solutions or solutions are recorded with little explanation. |
+    | **Select Best Solution** | Fully explains the "why" behind design decisions in each step of the design process for all significant aspects of a team's design. | Inconsistently explains the "why" behind design decisions. | Minimally explains the "why" behind design decisions. |
+    | **Build and Program the Solution** | Records the steps the team took to build and program the solution. Includes enough detail that the reader can follow the logic used by the team to develop their robot design, as well as recreate the robot design from the documentation. | Records the key steps to build and program the solution but lacks sufficient detail for the reader to follow their process. | Does not record the key steps to build and program the solution. |
+    | **Original Testing of Solutions** | Records all the steps to test the solution, including test results. Testing methodology is clearly explained, and the testing is done by the team. Original testing results are explained and conclusions are drawn from that data. | Records the key steps to test the solution. Testing methodology may be incomplete, or incomplete conclusions are recorded. | Does not record steps to test the solution. Testing or results are borrowed from another team's work. |
+    | **Repeat Design Process** | Shows that the design process is repeated multiple times to work towards a design goal. This includes a clear definition and justification of the design goal(s), its criteria, and constraints. The notebook shows setbacks that the team learned from, and shows design alternatives that were considered but not pursued. | Design process is not often repeated for design goals or robot/game performance. The notebook does not show alternate lines of inquiry, setbacks, or other learning experiences. | Does not show that the design process is repeated. Does not show setbacks or failures, or seems to be curated to craft a narrative. |
+
+    ### Section 2: Format and Content
+    | Criteria | Expert (4-5 Points) | Proficient (2-3 Points) | Emerging (0-1 Points) |
+    | :--- | :--- | :--- | :--- |
+    | **Independent Inquiry** | Team shows evidence of independent inquiry from the beginning stages of their design process. Notebook documents whether the implemented ideas have their origin with students on the team, or if students found inspiration elsewhere. | Team shows evidence of independent inquiry for some elements of their design process. Ideas and information from outside the team are documented. | Team shows little to no evidence of independent inquiry in their design process. Ideas from outside the team are not properly credited. Ideas or designs appear with no evidence of process. |
+    | **Usability & Completeness** | Records the entire design and development process with enough clarity and detail that the reader could recreate the project's history. Notebook has recent entries that align with the robot the team has brought to the event. | Records the design and development process completely but lacks sufficient detail. Documentation is inconsistent with possible gaps. | Lacks sufficient detail to understand the design process. Notebook has large gaps in time, or does not align with the robot the team has brought to the event. |
+    | **Originality & Quality** | Content is relevant and all content not original to the team longer than a paragraph is in appendices. Information originating from outside the team is always properly cited with the source and date accessed. Most or all content is original to the submitting team members. | Content is mostly relevant. Information originating from outside the team is properly credited. Cited content is paraphrased with some original content describing the team's design process. | Non-original content is excessive, is not kept in appendices, and/or is not cited. Plagiarised content should be noted to the JA pursuant to the RECF Code of Conduct process. |
+    | **Organization / Readability** | Entries are logged in a table of contents. There is an overall organization (color coded entries, tabs, markers) that makes it easy to reference. Contains little to no extraneous content that does not further the engineering design process. | Entries are logged in a table of contents. There is some organization to enhance readability. Contains some extraneous content, but it does not severely impact readability. | Entries are not logged in a table of contents, and there is little adherence to organization. Excessive extraneous content makes the notebook difficult to read, use, or understand. |
+    | **Record of Team & Project Management** | Provides a complete record of team and project assignments; contains team meeting notes including goals, decisions, and building/programming accomplishments; design cycles are easily identified. Resource constraints (time/materials) are noted throughout. Evidence documentation was done in sequence. Includes dates and names of contributing students. | Records most information but level of detail is inconsistent, or some aspects are missing. There are significant gaps in the overall record. Notebook may have inconsistent evidence of dates of entries and student contributions. | There are significant gaps or missing information for key design aspects. Notebook has little evidence of dates of entries and student contributions. |
+'''
 
 #reminder to pull both models `ollama pull [ model ]`
 Settings.llm = Ollama(
-    model="qwen2.5:32b",
+    model="qwen2.5:14b",
     request_timeout=600,
-    context_window=32768,
     additional_kwargs={
-        "num_ctx": 32768,
         "temperature": 0.1
     }
 )
 Settings.embed_model = OllamaEmbedding(
     model_name="nomic-embed-text",
-    additional_kwargs={"num_ctx" : 8192}
 ) 
-Settings.chunk_size = 1200
-Settings.chunk_overlap = 150
-
-splitter = MarkdownNodeParser()
 
 def get_db_connection():
     return psycopg2.connect(
@@ -75,26 +85,26 @@ def upload_pdfs(list):
     con = get_db_connection()
     cur = con.cursor()
     reader = PyMuPDFReader()
-    node_parser = HierarchicalNodeParser.from_defaults(chunk_sizes=[4096, 1024])
+    parser = SimpleNodeParser.from_defaults(chunk_size=512, chunk_overlap=20)
     for file in list: #for each pdf to upload,
         cur.execute("INSERT INTO registry (name) VALUES (%s) RETURNING id", (file.filename,)) #add the name to the registry to generate an id
         id = cur.fetchone()[0]
-        fname = secure_filename(f"{id}{file.filename}") #generate a unique name
-        pdf_path = os.path.join(f"{STORAGE}/pdf", fname) #generate the path to save the pdf
-        file.save(pdf_path) #save the pdf to the path
+
+        fname = os.path.splitext(secure_filename(f"{id}{file.filename}"))[0] #generate a unique name
+        
+        pdf_path = os.path.join(f"{STORAGE}/pdf", f"{fname}.pdf") #generate the path to save the pdf
         idx_path = os.path.join(f"{STORAGE}/idx", fname) #generate the path to save the index
-        os.makedirs(idx_path, exist_ok=True) #make the directory for the index
-        documents = documents = reader.load_data(pdf_path)
-        for d in documents:
-            d.metadata["notebook"] = fname
-        nodes = node_parser.get_nodes_from_documents(documents)
-        for node in nodes:
-            node.metadata["notebook"] = fname
-        idx = VectorStoreIndex(nodes) #create the index from the pdf
-        idx.storage_context.persist(persist_dir=idx_path) #save the index to the path
         res_path = os.path.join(f"{STORAGE}/res", f"{fname}.md") #generate the path to save the results
+
+        file.save(pdf_path) #save the pdf to the path
+        
+        os.makedirs(idx_path, exist_ok=True) #make the directory for the index
+        idx = VectorStoreIndex(parser.get_nodes_from_documents(reader.load_data(pdf_path))) #create the index from the pdf TODO: in the future use 1 idx for all notebooks
+        idx.storage_context.persist(persist_dir=idx_path) #save the index to the path
+        
         with open(res_path, "w") as f: #create an empty file for the results
             f.write("")
+        
         cur.execute("UPDATE registry SET pdf_path = %s, idx_path = %s, res_path = %s WHERE id = %s", (pdf_path, idx_path, res_path, id)) #add the name and paths to the registry
     con.commit()
     cur.close()
@@ -125,43 +135,117 @@ def get_idx(id):
     return load_index_from_storage(StorageContext.from_defaults(persist_dir=idx_path)) #load the index from that path and return it
 
 def query(id, query):
-    idx = get_idx(id)
     return RetrieverQueryEngine.from_args(
-        RecursiveRetriever( #this may be the bottleneck?
-            "vector",
-            retriever_dict={"vector" : idx.as_retriever(similarity_top_k=20)}, #originally 80
-            node_dict={node.node_id: node for node in list(idx.docstore.docs.values())},
-            verbose=True
-        ),
-        response_mode="compact",
+        get_idx(id).as_retriever(similarity_top_k=80),
+        response_mode="tree_summarize",
         streaming=True,
         text_qa_template=PromptTemplate("""
-            You are a VEX Robotics Engineering Notebook judge evaluating Team 97265A (Jagbots).
-
-            Question:
-            {query_str}
-
-            Analyze the notebook and extract evidence describing the team's engineering process.
-
-            Focus especially on:
-
-            • Brainstorming ideas and rejected concepts
-            • Design decisions and why designs were selected
-            • Mechanical subsystems (intake, drivetrain, etc.)
-            • Testing results and experiments
-            • Meeting discussions and engineering decisions
-            • Chronological development of the robot
-
-            Rules:
-            - Cite notebook pages like [Page X]
-            - Quote important engineering notes when helpful
-            - Reproduce tables if test data appears
-            - Reconstruct the timeline of development when possible
-
-            Context:
+            ### ROLE
+            You are an expert **VEX Robotics Engineering Notebook judge** evaluating a team's engineering notebook according to the official judging rubric.
+            Your job is to analyze the notebook content **objectively and evidence-first**, similar to a competition judge reviewing a submitted engineering notebook.
+            ---
+            ### CRITICAL SOURCE CITATION RULE
+            You **MUST cite the notebook as your source for every claim**.
+            All conclusions must reference **specific evidence from the notebook** such as:
+            * quoted text
+            * page references
+            * section titles
+            * timestamps or entry headings
+            Use this citation format:
+            `[Notebook Evidence: "<short quote or reference>"]`
+            If evidence cannot be found, explicitly state:
+            `[No clear evidence found in notebook]`
+            **Never invent content or assume sections exist without evidence.**
+            ---
+            ### CONTEXT FROM NOTEBOOK
             {context_str}
-
-            Engineering Analysis:
+            ---
+            ### ENGINEERING NOTEBOOK RUBRIC REFERENCE
+            {RUBRIC}
+            ---
+            ### EVALUATION REQUIREMENTS
+            Your response must satisfy the following requirements.
+            ---
+            ## 1. Notebook Summary
+            Provide a **concise summary of the team's project** including:
+            * robot objective or challenge
+            * key design direction
+            * main technical approach
+            * notable development milestones
+            Each statement must reference notebook evidence.
+            ---
+            ## 2. Section Presence & Structural Completeness Audit
+            Evaluate whether the following sections exist and are sufficiently documented:
+            * Problem Definition & Goals
+            * Brainstorming / Concept Generation
+            * Design Decisions & Justification
+            * Iteration / Redesign Documentation
+            * Build & Programming Documentation
+            * Testing & Results
+            For each section provide:
+            * **Status**: Present / Weak / Missing
+            * **Evidence** (quote or reference)
+            * **Notes on completeness**
+            Then produce:
+            **Structural Completeness Score (0–100)**
+            Score reflects **presence of core engineering documentation sections**, not judging quality.
+            Also output a **Section Presence Checklist**:
+            | Section | Present | Weak | Missing | Evidence |
+            | ------- | ------- | ---- | ------- | -------- |
+            ---
+            ## 3. Iteration Analysis
+            Identify and count **documented iteration cycles or improvements**.
+            An iteration counts if the notebook shows:
+            * a problem or limitation
+            * a modification or redesign
+            * resulting outcome or reasoning
+            Provide:
+            * **Total iteration cycles detected**
+            * A short bullet list of each iteration with cited evidence.
+            ---
+            ## 4. Authenticity & AI-Generated Content Check
+            Analyze the notebook for indicators of:
+            * AI-generated content
+            * overly polished or non-student writing
+            * missing trial-and-error documentation
+            * lack of natural engineering process
+            Flag potential concerns and explain **why**, supported by notebook evidence.
+            Indicators may include:
+            * sudden shifts in writing style
+            * extremely formal or generic explanations
+            * lack of mistakes, revisions, or iterative reasoning
+            * vague summaries instead of engineering logs
+            Provide:
+            * **Risk level**: Low / Moderate / High
+            * **Supporting evidence**
+            ---
+            ## 5. Rubric Comparison
+            Compare the notebook against **each major rubric category**.
+            For each category produce:
+            ### Rubric Category: <Name>
+            **Evidence Found**
+            * Short excerpts or references
+            * Each item must include notebook citations
+            **Evidence Missing or Unclear**
+            * Specific gaps relative to rubric expectations
+            **Confidence Level**
+            * High (clear strong evidence)
+            * Medium (some evidence but incomplete)
+            * Low (little or no evidence)
+            **Suggested Judge Interview Questions**
+            Provide **1–2 targeted questions** judges could ask the team to verify engineering understanding.
+            ---
+            ### OUTPUT FORMAT
+            Structure your response exactly using these headings:
+            1. Notebook Summary
+            2. Section Presence & Structural Completeness
+            3. Iteration Analysis
+            4. Authenticity Check
+            5. Rubric Comparison
+            All sections must include **explicit notebook evidence citations**.
+            ---
+            ### USER QUERY
+            {query_str}
         """)
     ).query(query)
 
@@ -198,12 +282,12 @@ if __name__ == "__main__":
     os.environ['DB_UN'] = 'citvex'
     os.environ['DB_PW'] = 'vexrobotics'
 
-    #print('starting, now resetting')
-    #reset()
-    #print('resetted, now uploading')
-    #upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
+    print('starting, now resetting')
+    reset()
+    print('resetted, now uploading')
+    upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
     print('uploaded, now querying')
-    res = query(get_pdfs()[0][0], "what did Maxwell contribute to the team's engineering process?")
+    res = query(get_pdfs()[0][0], "Perform a full judge evaluation of this notebook.")
     print('queried, now printing')
     for text in res.response_gen: 
         print(text, end="", flush=True)
