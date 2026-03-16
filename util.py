@@ -95,6 +95,15 @@ def upload_pdfs(list: list) -> None: #upload a list of pdfs
     cur.close()
     con.close()
 
+def get_pdf(id: int) -> str: #gets the absolute path of a pdf
+    con = get_db_connection()
+    cur = con.cursor()
+    cur.execute("SELECT dir FROM registry WHERE id = %s;", (id,))
+    dir = cur.fetchone()[0] #gets the directory of the pdf
+    cur.close()
+    con.close()
+    return os.path.abspath(os.path.join(dir, "source.pdf")) #returns the path of the source pdf
+
 def delete_pdf(id: int) -> None: #delete a pdf
     con = get_db_connection()
     cur = con.cursor()
