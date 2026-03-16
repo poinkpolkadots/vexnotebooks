@@ -167,6 +167,6 @@ if __name__ == "__main__":
     os.environ['DB_UN'] = 'citvex'
     os.environ['DB_PW'] = 'vexrobotics'
 
-    reset()
-    upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
-    query_and_write_all(get_pdfs()[0][0])
+    #reset()
+    #upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
+    #query_and_write_all(get_pdfs()[0][0])
