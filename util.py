@@ -1,6 +1,5 @@
 import os, shutil, psycopg2
 from enum import Enum
-from unicodedata import category
 from werkzeug.utils import secure_filename
 
 from llama_index.core import VectorStoreIndex, StorageContext, load_index_from_storage, Settings, PromptTemplate
@@ -33,22 +32,15 @@ RUBRIC = '''
 '''
 
 class Task(Enum):
-    SUMMARY = 0
-    SECTIONS = 1
-    ITERATION = 2
-    FLAGS = 3
-    RUBRIC = 4
-
-TASKS = [
-    '''
+    SUMMARY = '''
         Provide a **concise summary of the team's project** including:
         * robot objective or challenge
         * key design direction
         * main technical approach
         * notable development milestones
         Each statement must reference notebook evidence.
-    ''',
     '''
+    SECTIONS = '''
         Evaluate whether the following sections exist and are sufficiently documented:
         * Problem Definition & Goals
         * Brainstorming / Concept Generation
@@ -66,8 +58,8 @@ TASKS = [
         Also output a **Section Presence Checklist**:
         | Section | Present | Weak | Missing | Evidence |
         | ------- | ------- | ---- | ------- | -------- |
-    ''',
     '''
+    ITERATION = '''
         Identify and count **documented iteration cycles or improvements**.
         An iteration counts if the notebook shows:
         * a problem or limitation
@@ -76,8 +68,8 @@ TASKS = [
         Provide:
         * **Total iteration cycles detected**
         * A short bullet list of each iteration with cited evidence.
-    ''',
     '''
+    FLAGS = '''
         Analyze the notebook for indicators of:
         * AI-generated content
         * overly polished or non-student writing
@@ -92,8 +84,8 @@ TASKS = [
         Provide:
         * **Risk level**: Low / Moderate / High
         * **Supporting evidence**
-    ''',
     '''
+    RUBRIC = '''
         Compare the notebook against **each major rubric category**.
         For each category produce:
         ### Rubric Category: <Name>
@@ -109,7 +101,6 @@ TASKS = [
         **Suggested Judge Interview Questions**
         Provide **1–2 targeted questions** judges could ask the team to verify engineering understanding.
     '''
-]
 
 #reminder to pull both models `ollama pull [ model ]`
 Settings.llm = Ollama(
@@ -124,7 +115,7 @@ Settings.embed_model = OllamaEmbedding(
     model_name="nomic-embed-text",
 ) 
 
-def get_db_connection():
+def get_db_connection() -> psycopg2.connection:
     return psycopg2.connect(
         #host="drhscit.org",
         #database=os.environ['DB'],
@@ -136,7 +127,7 @@ def get_db_connection():
         password="1q2w3e4r"
     )
 
-def reset():
+def reset() -> None:
     con = get_db_connection()
     cur = con.cursor()
     cur.execute(
@@ -158,7 +149,7 @@ def reset():
     os.makedirs(os.path.join(STORAGE, "idx"), exist_ok=True) #create the directory for storing the AI's vector stores
     os.makedirs(os.path.join(STORAGE, "res"), exist_ok=True) #create the directory for storing the AI's responses
 
-def get_pdfs():
+def get_pdfs() -> tuple:
     con = get_db_connection()
     cur = con.cursor()
     cur.execute("SELECT id, name, timestamp FROM registry ORDER BY timestamp DESC;") #get the names and times added for each of the pdfs
@@ -167,7 +158,7 @@ def get_pdfs():
     con.close()
     return pdfs
 
-def upload_pdfs(list):
+def upload_pdfs(list: list) -> None:
     con = get_db_connection()
     cur = con.cursor()
     reader = PyMuPDFReader()
@@ -180,7 +171,7 @@ def upload_pdfs(list):
         
         pdf_path = os.path.join(f"{STORAGE}/pdf", f"{fname}.pdf") #generate the path to save the pdf
         idx_path = os.path.join(f"{STORAGE}/idx", fname) #generate the path to save the index
-        res_path = os.path.join(f"{STORAGE}/res", f"{fname}.md") #generate the path to save the results
+        res_path = os.path.join(f"{STORAGE}/res", fname) #generate the path to save the results
 
         file.save(pdf_path) #save the pdf to the path
         
@@ -188,15 +179,18 @@ def upload_pdfs(list):
         idx = VectorStoreIndex(parser.get_nodes_from_documents(reader.load_data(pdf_path))) #create the index from the pdf TODO: in the future use 1 idx for all notebooks
         idx.storage_context.persist(persist_dir=idx_path) #save the index to the path
         
-        with open(res_path, "w") as f: #create an empty file for the results
-            f.write("")
+        os.makedirs(res_path, exist_ok=True)
+        for t in Task:
+            path = os.path.join(res_path, f'{t.name.lower()}.md')
+            with open(path, "w") as f: #create an empty file for the results
+                f.write("")
         
         cur.execute("UPDATE registry SET pdf_path = %s, idx_path = %s, res_path = %s WHERE id = %s", (pdf_path, idx_path, res_path, id)) #add the name and paths to the registry
     con.commit()
     cur.close()
     con.close()
 
-def delete_pdf(id):
+def delete_pdf(id: int) -> None:
     con = get_db_connection()
     cur = con.cursor()
     cur.execute("DELETE FROM registry WHERE id = %s RETURNING (pdf_path, idx_path, res_path)", (id,)) #remove the pdf from the registry
@@ -211,7 +205,7 @@ def delete_pdf(id):
     cur.close()
     con.close()
 
-def get_idx(id):
+def get_idx(id: int) -> VectorStoreIndex:
     con = get_db_connection()
     cur = con.cursor()
     cur.execute("SELECT idx_path FROM registry WHERE id = %s", (id,)) #get the path of the index to load
@@ -220,11 +214,10 @@ def get_idx(id):
     con.close()
     return load_index_from_storage(StorageContext.from_defaults(persist_dir=idx_path)) #load the index from that path and return it
 
-def query(id, task):
+def query(id: int, task: Task) -> str:
     return RetrieverQueryEngine.from_args(
         get_idx(id).as_retriever(similarity_top_k=30),
         response_mode="compact",
-        streaming=True, #TODO eventually split into multile queries
         text_qa_template=PromptTemplate("""
             ### ROLE
             You are an expert **VEX Robotics Engineering Notebook judge** evaluating a team's engineering notebook according to the official judging rubric.
@@ -255,28 +248,31 @@ def query(id, task):
             ---
             All sections must include **explicit notebook evidence citations**.
         """)
-    ).query(TASKS[task])
+    ).query(task.value).response
 
-def set_res(id, res):
+def set_res(id: int, task: Task, res: str) -> None:
     con = get_db_connection()
     cur = con.cursor()
     cur.execute("SELECT res_path FROM registry WHERE id = %s", (id,)) #get the path of the results file to save to
-    path = cur.fetchone()[0]
-    with open(path, "w") as f: #save the results to that path
+    with open(os.path.join(cur.fetchone()[0], f'{task.name.lower()}.md'), "w") as f: #save the results to that path
         f.write(res)
     cur.close()
     con.close()
 
-def get_res(id):
+def get_res(id: int, task: Task) -> str:
     con = get_db_connection()
     cur = con.cursor()
     cur.execute("SELECT res_path FROM registry WHERE id = %s", (id,)) #get the path of the results file to read from
-    path = cur.fetchone()[0]
-    with open(path, "r") as f: #read the results from that path and return them
+    with open(os.path.join(cur.fetchone()[0], f'{task.name.lower()}.md'), "r") as f: #read the results from that path and return them
         res = f.read()
     cur.close()
     con.close()
     return res
+
+def query_and_write_all(id : int):
+    for t in Task:
+        set_res(id, t, query(id, t))
+        print(f'finished {t.name}')
 
 class LFW: #NOTE only for testing purposes (local file wrapper thingy)
     def __init__(self, local_path):
@@ -290,12 +286,6 @@ if __name__ == "__main__":
     os.environ['DB_UN'] = 'citvex'
     os.environ['DB_PW'] = 'vexrobotics'
 
-    print('starting, now resetting')
     reset()
-    print('resetted, now uploading')
     upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
-    print('uploaded, now querying')
-    res = query(get_pdfs()[0][0], Task.SUMMARY)
-    print('queried, now printing')
-    for text in res.response_gen: 
-        print(text, end="", flush=True)
+    id = get_pdfs()[0][0]
