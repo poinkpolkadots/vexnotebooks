@@ -1,4 +1,6 @@
 import os, shutil, psycopg2
+from enum import Enum
+from unicodedata import category
 from werkzeug.utils import secure_filename
 
 from llama_index.core import VectorStoreIndex, StorageContext, load_index_from_storage, Settings, PromptTemplate
@@ -30,12 +32,92 @@ RUBRIC = '''
     | **Record of Team & Project Management** | Provides a complete record of team and project assignments; contains team meeting notes including goals, decisions, and building/programming accomplishments; design cycles are easily identified. Resource constraints (time/materials) are noted throughout. Evidence documentation was done in sequence. Includes dates and names of contributing students. | Records most information but level of detail is inconsistent, or some aspects are missing. There are significant gaps in the overall record. Notebook may have inconsistent evidence of dates of entries and student contributions. | There are significant gaps or missing information for key design aspects. Notebook has little evidence of dates of entries and student contributions. |
 '''
 
+class Task(Enum):
+    SUMMARY = 0
+    SECTIONS = 1
+    ITERATION = 2
+    FLAGS = 3
+    RUBRIC = 4
+
+TASKS = [
+    '''
+        Provide a **concise summary of the team's project** including:
+        * robot objective or challenge
+        * key design direction
+        * main technical approach
+        * notable development milestones
+        Each statement must reference notebook evidence.
+    ''',
+    '''
+        Evaluate whether the following sections exist and are sufficiently documented:
+        * Problem Definition & Goals
+        * Brainstorming / Concept Generation
+        * Design Decisions & Justification
+        * Iteration / Redesign Documentation
+        * Build & Programming Documentation
+        * Testing & Results
+        For each section provide:
+        * **Status**: Present / Weak / Missing
+        * **Evidence** (quote or reference)
+        * **Notes on completeness**
+        Then produce:
+        **Structural Completeness Score (0–100)**
+        Score reflects **presence of core engineering documentation sections**, not judging quality.
+        Also output a **Section Presence Checklist**:
+        | Section | Present | Weak | Missing | Evidence |
+        | ------- | ------- | ---- | ------- | -------- |
+    ''',
+    '''
+        Identify and count **documented iteration cycles or improvements**.
+        An iteration counts if the notebook shows:
+        * a problem or limitation
+        * a modification or redesign
+        * resulting outcome or reasoning
+        Provide:
+        * **Total iteration cycles detected**
+        * A short bullet list of each iteration with cited evidence.
+    ''',
+    '''
+        Analyze the notebook for indicators of:
+        * AI-generated content
+        * overly polished or non-student writing
+        * missing trial-and-error documentation
+        * lack of natural engineering process
+        Flag potential concerns and explain **why**, supported by notebook evidence.
+        Indicators may include:
+        * sudden shifts in writing style
+        * extremely formal or generic explanations
+        * lack of mistakes, revisions, or iterative reasoning
+        * vague summaries instead of engineering logs
+        Provide:
+        * **Risk level**: Low / Moderate / High
+        * **Supporting evidence**
+    ''',
+    '''
+        Compare the notebook against **each major rubric category**.
+        For each category produce:
+        ### Rubric Category: <Name>
+        **Evidence Found**
+        * Short excerpts or references
+        * Each item must include notebook citations
+        **Evidence Missing or Unclear**
+        * Specific gaps relative to rubric expectations
+        **Confidence Level**
+        * High (clear strong evidence)
+        * Medium (some evidence but incomplete)
+        * Low (little or no evidence)
+        **Suggested Judge Interview Questions**
+        Provide **1–2 targeted questions** judges could ask the team to verify engineering understanding.
+    '''
+]
+
 #reminder to pull both models `ollama pull [ model ]`
 Settings.llm = Ollama(
-    model="qwen2.5:14b",
-    request_timeout=600,
+    model="qwen2.5:7b",
+    request_timeout=3600,
     additional_kwargs={
-        "temperature": 0.1
+        "temperature": 0.1,
+        "num_ctx": 32768
     }
 )
 Settings.embed_model = OllamaEmbedding(
@@ -44,10 +126,14 @@ Settings.embed_model = OllamaEmbedding(
 
 def get_db_connection():
     return psycopg2.connect(
-        host="drhscit.org",
-        database=os.environ['DB'],
-        user=os.environ['DB_UN'],
-        password=os.environ['DB_PW']
+        #host="drhscit.org",
+        #database=os.environ['DB'],
+        #user=os.environ['DB_UN'],
+        #password=os.environ['DB_PW']
+        host="localhost",
+        database="vexpdfs",
+        user="postgres",
+        password="1q2w3e4r"
     )
 
 def reset():
@@ -134,11 +220,11 @@ def get_idx(id):
     con.close()
     return load_index_from_storage(StorageContext.from_defaults(persist_dir=idx_path)) #load the index from that path and return it
 
-def query(id, query):
+def query(id, task):
     return RetrieverQueryEngine.from_args(
-        get_idx(id).as_retriever(similarity_top_k=80),
-        response_mode="tree_summarize",
-        streaming=True,
+        get_idx(id).as_retriever(similarity_top_k=30),
+        response_mode="compact",
+        streaming=True, #TODO eventually split into multile queries
         text_qa_template=PromptTemplate("""
             ### ROLE
             You are an expert **VEX Robotics Engineering Notebook judge** evaluating a team's engineering notebook according to the official judging rubric.
@@ -165,89 +251,11 @@ def query(id, query):
             ---
             ### EVALUATION REQUIREMENTS
             Your response must satisfy the following requirements.
-            ---
-            ## 1. Notebook Summary
-            Provide a **concise summary of the team's project** including:
-            * robot objective or challenge
-            * key design direction
-            * main technical approach
-            * notable development milestones
-            Each statement must reference notebook evidence.
-            ---
-            ## 2. Section Presence & Structural Completeness Audit
-            Evaluate whether the following sections exist and are sufficiently documented:
-            * Problem Definition & Goals
-            * Brainstorming / Concept Generation
-            * Design Decisions & Justification
-            * Iteration / Redesign Documentation
-            * Build & Programming Documentation
-            * Testing & Results
-            For each section provide:
-            * **Status**: Present / Weak / Missing
-            * **Evidence** (quote or reference)
-            * **Notes on completeness**
-            Then produce:
-            **Structural Completeness Score (0–100)**
-            Score reflects **presence of core engineering documentation sections**, not judging quality.
-            Also output a **Section Presence Checklist**:
-            | Section | Present | Weak | Missing | Evidence |
-            | ------- | ------- | ---- | ------- | -------- |
-            ---
-            ## 3. Iteration Analysis
-            Identify and count **documented iteration cycles or improvements**.
-            An iteration counts if the notebook shows:
-            * a problem or limitation
-            * a modification or redesign
-            * resulting outcome or reasoning
-            Provide:
-            * **Total iteration cycles detected**
-            * A short bullet list of each iteration with cited evidence.
-            ---
-            ## 4. Authenticity & AI-Generated Content Check
-            Analyze the notebook for indicators of:
-            * AI-generated content
-            * overly polished or non-student writing
-            * missing trial-and-error documentation
-            * lack of natural engineering process
-            Flag potential concerns and explain **why**, supported by notebook evidence.
-            Indicators may include:
-            * sudden shifts in writing style
-            * extremely formal or generic explanations
-            * lack of mistakes, revisions, or iterative reasoning
-            * vague summaries instead of engineering logs
-            Provide:
-            * **Risk level**: Low / Moderate / High
-            * **Supporting evidence**
-            ---
-            ## 5. Rubric Comparison
-            Compare the notebook against **each major rubric category**.
-            For each category produce:
-            ### Rubric Category: <Name>
-            **Evidence Found**
-            * Short excerpts or references
-            * Each item must include notebook citations
-            **Evidence Missing or Unclear**
-            * Specific gaps relative to rubric expectations
-            **Confidence Level**
-            * High (clear strong evidence)
-            * Medium (some evidence but incomplete)
-            * Low (little or no evidence)
-            **Suggested Judge Interview Questions**
-            Provide **1–2 targeted questions** judges could ask the team to verify engineering understanding.
-            ---
-            ### OUTPUT FORMAT
-            Structure your response exactly using these headings:
-            1. Notebook Summary
-            2. Section Presence & Structural Completeness
-            3. Iteration Analysis
-            4. Authenticity Check
-            5. Rubric Comparison
-            All sections must include **explicit notebook evidence citations**.
-            ---
-            ### USER QUERY
             {query_str}
+            ---
+            All sections must include **explicit notebook evidence citations**.
         """)
-    ).query(query)
+    ).query(TASKS[task])
 
 def set_res(id, res):
     con = get_db_connection()
@@ -287,7 +295,7 @@ if __name__ == "__main__":
     print('resetted, now uploading')
     upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
     print('uploaded, now querying')
-    res = query(get_pdfs()[0][0], "Perform a full judge evaluation of this notebook.")
+    res = query(get_pdfs()[0][0], Task.SUMMARY)
     print('queried, now printing')
     for text in res.response_gen: 
         print(text, end="", flush=True)
