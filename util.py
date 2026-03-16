@@ -127,18 +127,11 @@ def query(id: int, task: Task) -> str:
     return RetrieverQueryEngine.from_args(
         get_idx(id).as_retriever(similarity_top_k=30),
         response_mode="compact",
-        text_qa_template=PromptTemplate(f"""
-            {PROMPTS['main']}
-            ---
-            ### CONTEXT FROM NOTEBOOK
-            {'{context_str}'}
-            ---
-            ### ENGINEERING NOTEBOOK RUBRIC REFERENCE
-            {PROMPTS['rubric_ref']}
-            ---
-            ### EVALUATION REQUIREMENTS
-            {'{query_str}'}
-        """)
+        text_qa_template=PromptTemplate(PROMPTS['base'].format(
+            rubric_ref = PROMPTS['rubric_ref'],
+            context_str = "{context_str}",
+            query_str="{query_str}"
+        ))
     ).query(task.value).response
 
 def set_res(id: int, task: Task, res: str) -> None:
