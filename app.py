@@ -1,5 +1,6 @@
 import secrets
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
+from util import *
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = secrets.token_hex(16)
@@ -10,15 +11,27 @@ def index():
 
 @app.route('/catalog/')
 def catalog():
-    return render_template('catalog.html')
+    conn = get_db_connection()
+    cur = conn.cursor()
 
-@app.route('/notebookinfo/')
-def notebookinfo():
-    return render_template('notebookinfo.html')
+    cur.execute("SELECT * FROM registry")
+    data = cur.fetchall()
+    return render_template('catalog.html', notebooks = data)
 
-@app.route('/upload/')
+@app.route('/notebookinfo/<int:id>')
+def notebookinfo(id):
+    return render_template('notebookinfo.html', output = get_res(id))
+
+@app.route('/upload/', methods=("GET", "POST"))
 def upload():
-    return render_template('upload.html')
+    if request.method == "GET":
+        return render_template('upload.html')
+    elif request.method == "POST":
+        pdfs = request.files["files"]
+        ids = upload_pdfs(pdfs)
+        for id in ids:
+            query_and_write_all(id)
+        return redirect(url_for("index"))
 
 if __name__ == "__main__":
     app.run(debug=True)

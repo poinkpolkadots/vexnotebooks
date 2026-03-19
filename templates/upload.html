@@ -1,7 +1,13 @@
 {% extends 'base.html' %}
 {% block title %}Upload Notebook{% endblock %}
 {% block content %}
-    <div class="upload-row">
+    <!--basic upload function-->
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" accept=".pdf, application/pdf" name="files" multiple required>
+        <button type="submit">submit</button>
+    </form>
+
+    <!--<div class="upload-row">
 
         <div class="upload-section">
             <div class="upload-instructions">
@@ -12,8 +18,8 @@
                 <img alt="pdf symbol" src="/static/graphics/pdf symbol.png" style="width: 50px";>
             </div>
 
-            <!--If someone with more knowledge could help me id appreciate it-->
-            <!--When this div is clicked, it should let the user upload a pdf-->
+            If someone with more knowledge could help me id appreciate it
+            When this div is clicked, it should let the user upload a pdf
         </div>
 
         <div class="status-section">
@@ -24,8 +30,8 @@
 
             <div class="status-table">
                 <div class="pdf-status">
-                    <!--This is where the info for each uploaded pdf will go-->
-                    
+                    This is where the info for each uploaded pdf will go
+
                     <div class="notebook-name-uploadpage">
                         <p>Team3Notebook.pdf</p>
                     </div>
@@ -37,12 +43,12 @@
             </div>
 
             <div class="status-overview">
-                <p>1 Complete, 0 In Progress</p> <!--This is where the "2 complete | 1 in progress" part of the wireframe goes-->
+                <p>1 Complete, 0 In Progress</p> This is where the "2 complete | 1 in progress" part of the wireframe goes
             </div>
-            
+
             <div class="vic-button">
                 <a href="{{ url_for('catalog') }}" style="color: black;">View in Catalog &rarr;</a>
-            </div>
+            </div> -->
 
         </div>
 

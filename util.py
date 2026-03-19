@@ -32,12 +32,19 @@ Settings.llm = Ollama(
         "temperature": 0.1,
         "num_ctx": 32768
     })
+
+llm = Ollama(model="llama3.2:3b", request_timeout=3600, # variable storing the llm to be used for PDF parsing
+            additional_kwargs={
+                "temperature": 0.1,
+                "num_ctx": 32768
+            })
+
 Settings.embed_model = OllamaEmbedding(
     model_name="nomic-embed-text")
 
 def get_db_connection() -> psycopg2.extensions.connection: #get a connection from the database
     return psycopg2.connect(
-        #host="drhscit.org",
+        #host="os.environ['DB_HOST]", # 'drhscit.org'
         #database=os.environ['DB'],
         #user=os.environ['DB_UN'],
         #password=os.environ['DB_PW']
@@ -48,37 +55,39 @@ def get_db_connection() -> psycopg2.extensions.connection: #get a connection fro
         password="1q2w3e4r")
 
 def reset() -> None: #reset the db
-    con = get_db_connection()
-    cur = con.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute(
         "DROP TABLE IF EXISTS registry;" #remove the existing registry
         "CREATE TABLE registry (" #make a new one
             "id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY," #id of the pdf
             "name VARCHAR(255) NOT NULL," #name for the pdf
             "dir TEXT," #path to the directory
-            "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP" #timestamp of when the pdf was added
+            "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP," #timestamp of when the pdf was added
         ");")
-    con.commit()
+    conn.commit()
     cur.close()
-    con.close()
+    conn.close()
     if os.path.exists(STORAGE): shutil.rmtree(STORAGE) #remove the directory if it exists
     os.makedirs(os.path.join(STORAGE, "notebooks"), exist_ok=True) #make directory for pdfs
 
 def get_pdfs() -> tuple: #get all pdfs from db
-    con = get_db_connection()
-    cur = con.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute("SELECT id, name, timestamp FROM registry ORDER BY timestamp DESC;")
     pdfs = cur.fetchall() #get the ids, names, and times added for each of the pdfs
     cur.close()
-    con.close()
+    conn.close()
     return pdfs
 
 def upload_pdfs(list: list) -> None: #upload a list of pdfs
-    con = get_db_connection()
-    cur = con.cursor()
+    uploaded_ids = [] # list of all ids of uploaded pdfs
+    conn = get_db_connection()
+    cur = conn.cursor()
     for file in list: #for each pdf to upload,
         cur.execute("INSERT INTO registry (name) VALUES (%s) RETURNING id", (file.filename,))
         id = cur.fetchone()[0] #add the name to the registry to generate an id
+        uploaded_ids.append(id)
         fname = os.path.splitext(secure_filename(f"{id}{file.filename}"))[0] #generate a unique name
         dir = os.path.join(STORAGE, "notebooks", fname) #create the name for the directory
         os.makedirs(dir, exist_ok=True) #actually make the directory
@@ -91,56 +100,57 @@ def upload_pdfs(list: list) -> None: #upload a list of pdfs
         idx.storage_context.persist(persist_dir=idx_path) #save the index to the path
         with open(res_path, 'w') as f: json.dump({}, f) #initialize the json as empty
         cur.execute("UPDATE registry SET dir = %s WHERE id = %s", (dir, id)) #add the name and paths to the registry
-    con.commit()
+    conn.commit()
     cur.close()
-    con.close()
+    conn.close()
+    return uploaded_ids # return all the ids of the uploaded pdfs
 
 def get_pdf(id: int) -> str: #gets the absolute path of a pdf
-    con = get_db_connection()
-    cur = con.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute("SELECT dir FROM registry WHERE id = %s;", (id,))
     dir = cur.fetchone()[0] #gets the directory of the pdf
     cur.close()
-    con.close()
+    conn.close()
     return os.path.abspath(os.path.join(dir, "source.pdf")) #returns the path of the source pdf
 
 def delete_pdf(id: int) -> None: #delete a pdf
-    con = get_db_connection()
-    cur = con.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute("DELETE FROM registry WHERE id = %s RETURNING dir", (id,)) #remove the pdf from the registry
     dir = cur.fetchone()[0] #get the paths to the pdf, index, and results file
     if os.path.exists(dir): shutil.rmtree(dir) #remove the directory
-    con.commit()
+    conn.commit()
     cur.close()
-    con.close()
+    conn.close()
 
 def get_idx(id: int) -> VectorStoreIndex: #get an idx
-    con = get_db_connection()
-    cur = con.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute("SELECT dir FROM registry WHERE id = %s", (id,))
     idx_path = os.path.join(cur.fetchone()[0], "idx") #get the path of the index to load
     cur.close()
-    con.close()
+    conn.close()
     return load_index_from_storage(StorageContext.from_defaults(persist_dir=idx_path)) #load the index from that path and return it
 
 def set_res(id: int, task: Task, res: str) -> None: #set a result
-    con = get_db_connection()
-    cur = con.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute("SELECT dir FROM registry WHERE id = %s", (id,))
     res_path = os.path.join(cur.fetchone()[0], "res.json") #get the path of the results file to save to
     cur.close()
-    con.close()
+    conn.close()
     with open(res_path, 'r') as f: data = json.load(f) #get the current state
     data[task.name.lower()] = res #update the specific task to have the new result
     with open(res_path, 'w') as f: json.dump(data, f) #save the updated state
 
 def get_res(id: int, task: Task = None) -> str: #get a result
-    con = get_db_connection()
-    cur = con.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     cur.execute("SELECT dir FROM registry WHERE id = %s", (id,))
     res_path = os.path.join(cur.fetchone()[0], "res.json") #get the path of the results file to read from
     cur.close()
-    con.close()
+    conn.close()
     with open(res_path, 'r', encoding='utf-8') as f: data = json.load(f) #get the current state
     return data.get(task.name.lower()) if task else data #return value for the key of the task, if no task specified return the whole thing
 
