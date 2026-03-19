@@ -28,7 +28,7 @@ def upload():
             name = secure_filename(f"{str(uuid.uuid4())[:4]}_{file.filename}")
             path = os.path.join(app.config["UPLOAD_FOLDER"], name)
             file.save(path)
-            cur.execute("INSERT INTO registry (name, pdf_path) VALUES (%s, %s)", (name, path))
+            cur.execute("INSERT INTO registry (name, pdf_path, output) VALUES (%s, %s, %s)", (name, path, prompt_llm(pdf_to_text(path)))) # Very inefficient to prompt the llm and put all the text in
 
         conn.commit()
         cur.close()
@@ -38,7 +38,15 @@ def upload():
 
 @app.route("/view/<name>") # should change to use id instead of name
 def view(name):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], name)
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT output FROM registry WHERE name = %s", (name,))
+    data = cur.fetchone()
+
+    return render_template("view.html", output = data)
+
+    # return send_from_directory(app.config["UPLOAD_FOLDER"], name)
 
 @app.route("/delete/<name>") # should change to use id instead of name
 def delete(name):

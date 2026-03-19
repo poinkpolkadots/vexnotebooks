@@ -1,6 +1,9 @@
 import lmstudio, fitz, os, shutil, psycopg2
+from llama_index.llms.ollama import Ollama
 
 folder = "C:\\vexnotebooks"
+
+llm = Ollama(model="llama3.2:3b", request_timeout=60.0)
 
 def pdf_to_images(path): #convert each page of a PDF to an image and return list of images
     doc = fitz.open(path) #open the PDF document
@@ -31,6 +34,19 @@ def pdf_to_text(path): #convert PDF to text
     doc.close() #close the PDF document
     return text #return the extracted text
 
+# function to get llm response
+# NOT EFFICIENT, giving the whole PDF as text is not the best way to do this
+def prompt_llm(prompt_data):
+    response = llm.complete("You are an assistant to VEX Robotics Judges and your goal is to help them grade this engineering notebook's text: %s."
+                            "Generate the following based on the given notebook text in without being too verbose, and use bulleted lists when requested:"
+                            "A notebook summary,"
+                            "Point out instances of creativity and iteration notes in a bulleted list,"
+                            "Suggest 5-10 interview questions based on notebook content in a bulleted list"
+                            "Detect missing sections and list them in a bulleted list"
+                            "Give a count of iteration cycles or improvements"
+                            "You should add headings and titles to make your output easy to read.", (prompt_data))
+    return response
+
 def get_db_connection():
     conn = psycopg2.connect( #defaults for local testing TODO: change to env variables later
         host="localhost",
@@ -59,7 +75,8 @@ def reset():
             "id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,"
             "name VARCHAR(255) NOT NULL,"
             "pdf_path TEXT NOT NULL,"
-            "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "llm_output TEXT" # not optimal, very inefficient
         ");"
     )
     conn.commit()
