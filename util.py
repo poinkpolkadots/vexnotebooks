@@ -40,6 +40,16 @@ def get_db_connection():
     )
     return conn
 
+# Functionality for setting custom connection, if needed
+# def get_db_connection():
+#     conn = psycopg2.connect(
+#         host = os.environ["DB_HOST"],
+#         database = os.environ["DB"],
+#         user = os.environ["DB_UN"],
+#         password = os.environ["DB_PW"]
+#     )
+#     return conn
+
 def reset():
     conn = get_db_connection()
     cur = conn.cursor()
@@ -61,6 +71,8 @@ def reset():
     os.makedirs(os.path.join(folder, "pdf"), exist_ok=True)
     os.makedirs(os.path.join(folder, "txt"), exist_ok=True)
 
+
+
 #OLD IMPLEMENTATION
 #def summarize_image_pdf_pages(pdf_path): #main function to summarize each page of a PDF given the path to the PDF
 #    intepret = lmstudio.llm("zai-org/glm-4.6v-flash") #model for interpreting images TODO: use a faster model pls
@@ -79,7 +91,7 @@ def reset():
 #        res = intepret.respond(pagechat, config={ "temperature": 0.0 }).content #get summary for each page without any DREAMING
 #        page_summaries.append(res) #add summary to list
 #        print(res) #TODO: THIS IS DEBUG, REMOVE LATER
-#    
+#
 #    return page_summaries #return list of page summaries
 #
 #model = lmstudio.llm("llama-3.2-3b-instruct")
@@ -92,7 +104,7 @@ def reset():
 #        "Given the following notebook, generate a list of questions that a judge should ask themselves when evaluating the notebook. "
 #        "The questions should be based on the 2025 REC Foundation Rubric criteria, and should help the judge evaluate the notebook based on the evidence provided in the summaries. "
 #        "The questions should be general enough to apply to any notebook, but specific enough to be helpful in evaluating the notebook based on the evidence provided."
-#        "Here is the notebook in text form, understand that there were images left out:\n" + 
+#        "Here is the notebook in text form, understand that there were images left out:\n" +
 #        pdf_to_text("C:/Users/lawre/OneDrive/Documents/vex/vexnotebooks/HTML_Site/pdfs/Sample2-Engineering-notebook.pdf")
 #    )}
 #]})):

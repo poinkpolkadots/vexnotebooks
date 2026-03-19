@@ -29,18 +29,18 @@ def upload():
             path = os.path.join(app.config["UPLOAD_FOLDER"], name)
             file.save(path)
             cur.execute("INSERT INTO registry (name, pdf_path) VALUES (%s, %s)", (name, path))
-        
+
         conn.commit()
         cur.close()
         conn.close()
         return redirect(url_for("index"))
     return render_template("upload.html")
 
-@app.route("/view/<name>")
+@app.route("/view/<name>") # should change to use id instead of name
 def view(name):
     return send_from_directory(app.config["UPLOAD_FOLDER"], name)
 
-@app.route("/delete/<name>")
+@app.route("/delete/<name>") # should change to use id instead of name
 def delete(name):
     conn = get_db_connection()
     cur = conn.cursor()
