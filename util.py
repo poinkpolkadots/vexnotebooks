@@ -47,15 +47,11 @@ Settings.embed_model = OllamaEmbedding(
 
 def get_db_connection() -> psycopg2.extensions.connection: #get a connection from the database
     return psycopg2.connect(
-        #host="os.environ['DB_HOST]", # 'drhscit.org'
-        #database=os.environ['DB'],
-        #user=os.environ['DB_UN'],
-        #password=os.environ['DB_PW']
-        #TODO change back, cit servers are down
-        host="localhost",
-        database="vexpdfs",
-        user="postgres",
-        password="1q2w3e4r")
+        host="drhscit.org",
+        port=os.getenv('DB_PORT', 5432),
+        database=os.getenv('DB'),
+        user=os.getenv('DB_UN'),
+        password=os.getenv('DB_PW'))
 
 def reset() -> None: #reset the db
     conn = get_db_connection()
@@ -175,11 +171,7 @@ def query_and_write_all(id : int): #does all the tasks for a pdf
         set_res(id, t, query(idx, t))
         print(f'finished {t.name}')
 
-if __name__ == "__main__":
-    os.environ['DB'] = 'citvexdb'
-    os.environ['DB_UN'] = 'citvex'
-    os.environ['DB_PW'] = 'vexrobotics'
-
+if __name__ == "__main__": #NOTE only for testing!!
     reset()
     upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
     query_and_write_all(get_pdfs()[0][0])
