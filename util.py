@@ -47,9 +47,9 @@ Settings.embed_model = OllamaEmbedding(
 
 def get_db_connection() -> psycopg2.extensions.connection: #get a connection from the database
     return psycopg2.connect(
-        host="drhscit.org",
+        host=os.getenv('HOST'),
         port=os.getenv('DB_PORT', 5432),
-        database=os.getenv('DB'),
+        database=os.getenv('DB'), 
         user=os.getenv('DB_UN'),
         password=os.getenv('DB_PW'))
 
@@ -172,6 +172,7 @@ def query_and_write_all(id : int): #does all the tasks for a pdf
         print(f'finished {t.name}')
 
 if __name__ == "__main__": #NOTE only for testing!!
-    reset()
-    upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
-    query_and_write_all(get_pdfs()[0][0])
+    con = get_db_connection()
+    #reset()
+    #upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
+    #query_and_write_all(get_pdfs()[0][0])
