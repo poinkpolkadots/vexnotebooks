@@ -1,5 +1,11 @@
-{% extends "base.html" %}
-{% block title %}View Output{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Notebook Information{% endblock %}
 {% block content %}
-
+<!--Deleted all other content for now, just because we don't have functionality to display them individually-->
+<h1>Notebook Information</h1>
+    <div class="dashboard-container">
+        <div class="dashboard-box questions-div">
+            <p class="box-title">{{ output }}</p> <!--Probably very inefficient, but will still work-->
+        </div>
+    </div>
 {% endblock %}
