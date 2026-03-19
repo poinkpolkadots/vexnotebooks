@@ -1,24 +1,32 @@
 {% extends 'base.html' %}
 {% block title %}Notebook Info{% endblock %}
 {% block content %}
-    <div class="info-header">
+
+<h1>Notebook Information</h1>
+<div class="dashboard-container">
+    <div class="dashboard-box questions-div">
+        <p class="box-title">{{ output }}</p> <!--Probably very inefficient, but will still work-->
+    </div>
+</div>
+<!--comment out the fancy grid layout, don't have ability to do that right now-->
+<!--    <div class="info-header">
         <p class="notebook-title">Team3Notebook.pdf</p>
         <div class="score-pill">80/100</div>
         <button class="download-btn">
-            Download PDF 
-            <img alt="down" src="/static/graphics/download symbol.png" class="download-icon"> <!--dont have the png so it doesnt show up rn-->
+            Download PDF
+            <img alt="down" src="/static/graphics/download symbol.png" class="download-icon"> <!--dont have the png so it doesnt show up rn
         </button>
     </div>
     <div class="dashboard-container">
-        
+
         <div class="dashboard-top-row">
-            
+
             <div class="top-left-column">
                 <div class="dashboard-box summary-div">
                     <p><strong>Summary:</strong></p>
                     <p>This notebook covers the full design cycle of the robot, focusing on the intake mechanism and drivetrain iterations. It includes detailed sketches and CAD models.</p>
                 </div>
-                
+
                 <div class="flags-iterations-row">
                     <div class="dashboard-box flags-div">
                         <p class="box-title">&#9873; Flags for review:</p>
@@ -96,5 +104,5 @@
                 </tr>
             </table>
         </div>
-    </div>
+    </div>-->
 {% endblock %}
