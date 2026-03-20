@@ -1,3 +1,5 @@
+site opens at http://localhost:5000 once started
+
 ## run w/ docker
 download at: https://docs.docker.com/desktop/setup/install/windows-install/
 
@@ -9,7 +11,6 @@ docker exec -it vexnotebooks-ollama-1 ollama pull nomic-embed-text
 docker-compose exec web python -c "from util import reset; reset()"
 docker-compose up -d
 ```
-site opens at http://localhost:5000
 
 ```bash docker-compose exec web python [ path ]``` run [ path ] python script
 
@@ -25,6 +26,7 @@ site opens at http://localhost:5000
 
 ## run w/o docker
 download ollama at: https://ollama.com/download/windows and ensure that it's running
+
 download python at: https://www.python.org/downloads/
 
 ### run to install dependencies and get models
