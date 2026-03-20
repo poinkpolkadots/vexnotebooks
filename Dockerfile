@@ -15,10 +15,11 @@ CMD ["python", "app.py"]
 
 # docker-compose up -d (run container)
 # docker-compose exec web python [ path ] (run python script)
+# docker-compose exec web python -c "from util import reset; reset()" (reset db)
 
 # opens at http://localhost:5000
 
 # docker-compose ps (containers are running or crashed)
-# docker-compose logs -f web ("print" statements and errors)
+# docker-compose logs -f [ web / worker / ollama ] ("print" statements and errors)
 # docker-compose stop (shuts everything down without deleting data)
 # docker-compose down (stops and removes the containers entirely)

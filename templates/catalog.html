@@ -9,7 +9,7 @@
         {% for notebook in notebooks %}
         <a href="{{ url_for('notebookinfo', id=notebook[0]) }}" class="notebook-card">
             <div class="notebook-overview">
-                <p class="notebook-name">{{notebook[1]}}</p>
+                <p class="notebook-name">{{notebook[1]}} ({{notebook[3]}})</p>
                 <div class="thumbnail-placeholder">
                     <img class="notebook-thumbnail" src="{{url_for('pdfthumb', id=notebook[0])}}" alt="PDF">
                 </div>

@@ -60,7 +60,7 @@ def reset() -> None: #reset the db
             "name VARCHAR(255) NOT NULL," #name for the pdf
             "dir TEXT," #path to the directory
             "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP," #timestamp of when the pdf was added
-            "status TEXT CHECK(status = 'pending' OR status = 'processing' OR status = 'complete') DEFAULT 'pending'" #if the llm has generated responses yet
+            "status TEXT CHECK(status = 'pending' OR status = 'embedding' OR status = 'embedded' OR status = 'processing' OR status = 'complete') DEFAULT 'pending'" #status of the data in the directory
         ");")
     conn.commit()
     cur.close()
@@ -71,7 +71,7 @@ def reset() -> None: #reset the db
 def get_pdfs() -> tuple: #get all pdfs from db
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT id, name, timestamp FROM registry ORDER BY timestamp DESC;")
+    cur.execute("SELECT id, name, timestamp, status FROM registry ORDER BY timestamp DESC;")
     pdfs = cur.fetchall() #get the ids, names, and times added for each of the pdfs
     cur.close()
     conn.close()
@@ -93,8 +93,6 @@ def upload_pdfs(list: list) -> None: #upload a list of pdfs
         res_path = os.path.join(dir, "res.json") #generate the path to save the results
         file.save(pdf_path) #save the pdf to the path
         os.makedirs(idx_path, exist_ok=True) #make the directory for the index
-        idx = VectorStoreIndex.from_documents(SimpleDirectoryReader(input_files=[pdf_path]).load_data()) #create the index from the pdf
-        idx.storage_context.persist(persist_dir=idx_path) #save the index to the path
         with open(res_path, 'w') as f: json.dump({}, f) #initialize the json as empty
         cur.execute("UPDATE registry SET dir = %s WHERE id = %s", (dir, id)) #add the name and paths to the registry
     conn.commit()
@@ -124,6 +122,17 @@ def delete_pdf(id: int) -> None: #delete a pdf
     conn.commit()
     cur.close()
     conn.close()
+
+def create_idx(id: int) -> VectorStoreIndex:
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT dir FROM registry WHERE id = %s", (id,))
+    dir = cur.fetchone()[0] #get the directory for the pdf
+    pdf_path = os.path.join(dir, "source.pdf") #get the pdf path
+    idx_path = os.path.join(dir, "idx") #get the index path
+    idx = VectorStoreIndex.from_documents(SimpleDirectoryReader(input_files=[pdf_path]).load_data()) #create the index from the pdf
+    idx.storage_context.persist(persist_dir=idx_path) #save the index to the path
+    return idx
 
 def get_idx(id: int) -> VectorStoreIndex: #get an idx
     conn = get_db_connection()
