@@ -10,14 +10,12 @@ from llama_index.core.query_engine import RetrieverQueryEngine
 
 load_dotenv() #for testing, load envs from .env file
 
-if os.path.exists('/.dockerenv'):
-    DB_HOST = os.getenv('DOCKER_DB_HOST', 'db')
-    OLLAMA_URL = os.getenv('DOCKER_OLLAMA_URL', 'http://ollama:11434')
-    STORAGE = "/app/storage"
-else:
-    DB_HOST = os.getenv('LOCAL_DB_HOST', 'localhost')
-    OLLAMA_URL = os.getenv('LOCAL_OLLAMA_URL', 'http://localhost:11434')
-    STORAGE = os.path.join(os.getcwd(), "storage")
+IN_DOCKER = os.path.exists('/.dockerenv') #using docker if docker created a env file
+
+#host, ollama, and storage change if using docker or not
+DB_HOST  = 'db' if IN_DOCKER else 'drhscit.org' #NOTE or 'localhost' if external db software is installed 
+OLLAMA_URL = f'http://{'ollama' if IN_DOCKER else 'localhost'}:11434'
+STORAGE = "/app/storage" if IN_DOCKER else os.path.join(os.getcwd(), "storage")
 
 PROMPTS = yaml.safe_load(open('prompts.yaml', 'r', encoding='utf-8')) #all the prompts used
 
@@ -198,7 +196,7 @@ def query_and_write_all(id : int): #does all the tasks for a pdf
         set_res(id, t, query(idx, t))
         print(f'finished {t.name}')
 
-#NOTE only for local testing!!
+#NOTE only for testing!!
 #if __name__ == "__main__":
     #reset()
     #upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
