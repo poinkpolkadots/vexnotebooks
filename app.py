@@ -17,7 +17,7 @@ def catalog():
 def notebookinfo(id):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT name FROM registry WHERE id = %s" (id,))
+    cur.execute("SELECT name FROM registry WHERE id = %s", (id,))
     data = cur.fetchone()
 
     return render_template('notebookinfo.html', name = data, output = get_res(id))
