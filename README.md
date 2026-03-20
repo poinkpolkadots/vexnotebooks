@@ -14,17 +14,17 @@ docker-compose exec web python -c "from util import reset; reset()"
 docker-compose up -d
 ```
 
-```bash docker-compose exec web python [ path ]``` run [ path ] python script
+```docker-compose exec web python [ path ]``` run [ path ] python script
 
-```bash docker-compose ps``` view status
+```docker-compose ps``` view status
 
-```bash docker-compose logs -f [ web / worker / ollama / db ]``` view logs for a container
+```docker-compose logs -f [ web / worker / ollama / db ]``` view logs for a container
 
-```bash docker-compose restart [ web / worker / ollama / db ]``` restart a container
+```docker-compose restart [ web / worker / ollama / db ]``` restart a container
 
-```bash docker-compose stop``` shuts everything down without deleting data
+```docker-compose stop``` shuts everything down without deleting data
 
-```bash docker-compose down``` stops and removes the containers entirely
+```docker-compose down``` stops and removes the containers entirely
 
 ## run w/o docker
 download ollama at: https://ollama.com/download/windows and ensure that it's running
@@ -38,6 +38,8 @@ ollama pull qwen2.5:7b
 ollama pull nomic-embed-text
 ```
 
-```bash python -c "from util import reset; reset()"``` reset the database
+```python -c "from util import reset; reset()"``` reset the database
 
-run both ```bash python app.py``` and ```bash python worker.py``` in 2 seperate terminals
+run both ```python app.py``` and ```python worker.py``` in 2 seperate terminals
+
+note that the pdf data is stored along with the rest of the code. multiple viewers will be unable to see the same pdf data since it's not being put onto a real server.
