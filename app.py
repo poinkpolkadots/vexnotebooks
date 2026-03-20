@@ -15,7 +15,12 @@ def catalog():
 
 @app.route('/notebookinfo/<int:id>')
 def notebookinfo(id):
-    return render_template('notebookinfo.html', output = get_res(id))
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT name FROM registry WHERE id = %s" (id,))
+    data = cur.fetchone()
+
+    return render_template('notebookinfo.html', name = data, output = get_res(id))
 
 @app.route('/pdfthumb/<int:id>')
 def pdfthumb(id):
