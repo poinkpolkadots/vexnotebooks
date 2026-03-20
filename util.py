@@ -13,8 +13,9 @@ load_dotenv() #load envs from .env file
 IN_DOCKER = os.path.exists('/.dockerenv') #using docker if docker created a env file
 
 #host, ollama, and storage change if using docker or not
-DB_HOST  = 'db' if IN_DOCKER else 'drhscit.org' 
-OLLAMA_URL = f'http://{'ollama' if IN_DOCKER else 'localhost'}:11434'
+DB_HOST = 'db' if IN_DOCKER else 'drhscit.org' 
+DB_PORT = os.getenv('DB_PORT') if DB_HOST == 'drhscit.org' else 5432
+OLLAMA_URL = f"http://{'ollama' if IN_DOCKER else 'localhost'}:11434"
 STORAGE = "/app/storage" if IN_DOCKER else os.path.join(os.getcwd(), "storage")
 
 PROMPTS = yaml.safe_load(open('prompts.yaml', 'r', encoding='utf-8')) #all the prompts used
@@ -42,7 +43,7 @@ Settings.embed_model = OllamaEmbedding(
 def get_db_connection() -> psycopg2.extensions.connection: #get a connection from the database
     return psycopg2.connect(
         host=DB_HOST,
-        port=os.getenv('DB_PORT', 5432),
+        port=DB_PORT,
         database=os.getenv('DB'), 
         user=os.getenv('DB_UN'),
         password=os.getenv('DB_PW'))
