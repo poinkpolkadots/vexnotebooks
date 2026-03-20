@@ -1,5 +1,5 @@
 import secrets
-from flask import Flask, render_template, request, redirect, url_for
+from flask import *
 from util import *
 
 app = Flask(__name__)
@@ -11,27 +11,24 @@ def index():
 
 @app.route('/catalog/')
 def catalog():
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    cur.execute("SELECT * FROM registry")
-    data = cur.fetchall()
-    return render_template('catalog.html', notebooks = data)
+    return render_template('catalog.html', notebooks = get_pdfs())
 
 @app.route('/notebookinfo/<int:id>')
 def notebookinfo(id):
     return render_template('notebookinfo.html', output = get_res(id))
+
+@app.route('/pdfthumb/<int:id>')
+def pdfthumb(id):
+    return send_file(get_pdf_thumb(id), 'image/png')
 
 @app.route('/upload/', methods=("GET", "POST"))
 def upload():
     if request.method == "GET":
         return render_template('upload.html')
     elif request.method == "POST":
-        pdfs = request.files["files"]
-        ids = upload_pdfs(pdfs)
-        for id in ids:
-            query_and_write_all(id)
-        return redirect(url_for("index"))
+        pdfs = request.files.getlist("files")
+        upload_pdfs(pdfs)
+        return redirect(url_for("catalog"))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
