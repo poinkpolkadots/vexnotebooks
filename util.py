@@ -1,4 +1,4 @@
-import os, shutil, psycopg2, yaml, json, fitz, io
+import os, shutil, psycopg2, yaml, json, fitz, io, markdown
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from enum import Enum
@@ -169,6 +169,9 @@ def get_res(id: int, task: Task = None) -> str: #get a result
     conn.close()
     with open(res_path, 'r', encoding='utf-8') as f: data = json.load(f) #get the current state
     return data.get(task.name.lower()) if task else data #return value for the key of the task, if no task specified return the whole thing
+
+def format_markdown(raw: str) -> str:
+    return markdown.markdown(raw, extensions=['fenced_code', 'tables', 'sane_lists', 'nl2br'])
 
 def query(idx: VectorStoreIndex, task: Task) -> str: #query the llm to do a task
     return RetrieverQueryEngine.from_args(

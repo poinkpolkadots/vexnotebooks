@@ -3,7 +3,7 @@ psycopg2-binary
 python-dotenv
 werkzeug
 pyyaml
-llama-index==0.11.0
+llama-index
 llama-index-llms-ollama
 llama-index-embeddings-ollama
 PyMuPDF

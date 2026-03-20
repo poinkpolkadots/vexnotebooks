@@ -9,8 +9,8 @@
 <div class="dashboard-container">
     {%for key, value in output.items()%}
         <div class="dashboard-box">
-            <h3>{{key}}</h3>
-            <p>{{value}}</p>
+            <h3>{{key|capitalize}}</h3>
+            <p>{{value|safe}}</p>
         </div>
     {%endfor%}
 </div>

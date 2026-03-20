@@ -19,8 +19,7 @@ def notebookinfo(id):
     cur = conn.cursor()
     cur.execute("SELECT name FROM registry WHERE id = %s", (id,))
     data = cur.fetchone()
-
-    return render_template('notebookinfo.html', name = data, output = get_res(id))
+    return render_template('notebookinfo.html', name = data, output = {k: format_markdown(v) for k, v in get_res(id).items()})
 
 @app.route('/pdfthumb/<int:id>')
 def pdfthumb(id):
