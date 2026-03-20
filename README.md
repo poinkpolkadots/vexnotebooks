@@ -27,7 +27,12 @@ site opens at http://localhost:5000
 download ollama at: https://ollama.com/download/windows and ensure that it's running
 download python at: https://www.python.org/downloads/
 
-```bash pip install -r requirements.txt``` run to install dependencies
+### run to install dependencies and get models
+```bash 
+pip install -r requirements.txt
+ollama pull qwen2.5:7b
+ollama pull nomic-embed-text
+```
 
 ```bash python -c "from util import reset; reset()"``` reset the database
 

@@ -33,7 +33,6 @@ class LFW: #NOTE only for testing purposes (local file wrapper thingy)
     def save(self, destination):
         shutil.copyfile(self.local_path, destination)
 
-#reminder to pull both models `ollama pull [ model ]`
 Settings.llm = Ollama(
     model="qwen2.5:7b",
     base_url=OLLAMA_URL,

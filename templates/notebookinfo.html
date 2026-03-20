@@ -7,9 +7,12 @@
     <p class="notebook-title">{{ name[0] }}</p>
 </div>
 <div class="dashboard-container">
-    <div class="dashboard-box questions-div">
-        <p class="box-title">{{ output }}</p> <!--Probably very inefficient, but will still work-->
-    </div>
+    {%for key, value in output.items()%}
+        <div class="dashboard-box">
+            <h3>{{key}}</h3>
+            <p>{{value}}</p>
+        </div>
+    {%endfor%}
 </div>
 <!--comment out the fancy grid layout, don't have ability to do that right now-->
 <!--    <div class="info-header">
