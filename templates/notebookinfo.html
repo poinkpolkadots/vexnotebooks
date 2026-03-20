@@ -10,7 +10,7 @@
     {%for key, value in output.items()%}
         <div class="dashboard-box">
             <h3>{{key|capitalize}}</h3>
-            <p>{{value|safe}}</p>
+            <div>{{value|safe}}</div>
         </div>
     {%endfor%}
 </div>
