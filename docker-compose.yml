@@ -37,6 +37,8 @@ services:
     depends_on:
       - db
       - ollama
+    environment:
+      - PYTHONUNBUFFERED=1
 
 volumes:
   postgres_data:

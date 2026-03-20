@@ -10,8 +10,15 @@ from llama_index.core.query_engine import RetrieverQueryEngine
 
 load_dotenv() #for testing, load envs from .env file
 
-STORAGE = "/app/storage" #storage using docker
-#STORAGE = os.path.join(os.getcwd(), "storage") #testing storage
+if os.path.exists('/.dockerenv'):
+    DB_HOST = os.getenv('DOCKER_DB_HOST', 'db')
+    OLLAMA_URL = os.getenv('DOCKER_OLLAMA_URL', 'http://ollama:11434')
+    STORAGE = "/app/storage"
+else:
+    DB_HOST = os.getenv('LOCAL_DB_HOST', 'localhost')
+    OLLAMA_URL = os.getenv('LOCAL_OLLAMA_URL', 'http://localhost:11434')
+    STORAGE = os.path.join(os.getcwd(), "storage")
+
 PROMPTS = yaml.safe_load(open('prompts.yaml', 'r', encoding='utf-8')) #all the prompts used
 
 class Task(Enum): #each task prompt, enum used for static typing
@@ -31,7 +38,7 @@ class LFW: #NOTE only for testing purposes (local file wrapper thingy)
 #reminder to pull both models `ollama pull [ model ]`
 Settings.llm = Ollama(
     model="qwen2.5:7b",
-    base_url="http://ollama:11434",
+    base_url=OLLAMA_URL,
     request_timeout=3600,
     additional_kwargs={
         "temperature": 0.1,
@@ -40,11 +47,11 @@ Settings.llm = Ollama(
 
 Settings.embed_model = OllamaEmbedding(
     model_name="nomic-embed-text",
-    base_url="http://ollama:11434")
+    base_url=OLLAMA_URL)
 
 def get_db_connection() -> psycopg2.extensions.connection: #get a connection from the database
     return psycopg2.connect(
-        host=os.getenv('HOST', 'db'),
+        host=DB_HOST,
         port=os.getenv('DB_PORT', 5432),
         database=os.getenv('DB'), 
         user=os.getenv('DB_UN'),
@@ -65,7 +72,16 @@ def reset() -> None: #reset the db
     conn.commit()
     cur.close()
     conn.close()
-    if os.path.exists(STORAGE): shutil.rmtree(STORAGE) #remove the directory if it exists
+    if os.path.exists(STORAGE): #if the storage exists,
+        for filename in os.listdir(STORAGE): #for everything in the folder
+            file_path = os.path.join(STORAGE, filename) #get the filepath
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path) #if it's a file, delete the file
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path) #if it's a folder, delete the folder
+            except Exception as e:
+                print(e) #print any errors that occur
     os.makedirs(os.path.join(STORAGE, "notebooks"), exist_ok=True) #make directory for pdfs
 
 def get_pdfs() -> tuple: #get all pdfs from db
@@ -182,8 +198,8 @@ def query_and_write_all(id : int): #does all the tasks for a pdf
         set_res(id, t, query(idx, t))
         print(f'finished {t.name}')
 
-if __name__ == "__main__": #NOTE only for testing!!
-    con = get_db_connection()
+#NOTE only for local testing!!
+#if __name__ == "__main__":
     #reset()
     #upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
     #query_and_write_all(get_pdfs()[0][0])

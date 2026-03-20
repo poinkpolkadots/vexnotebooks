@@ -3,7 +3,7 @@ from util import *
 
 def run():
     while True: #runs forever
-        print('scanning')
+        #print('scanning') #NOTE may or may not be desired, since this will print every 5 seconds
         try: #prevent from crashing
             con = get_db_connection()
             cur = con.cursor()
@@ -34,7 +34,6 @@ def run():
         except Exception as e: #if any error happens
             print(e) #print it out
             time.sleep(10) #wait a bit longer
-        print('scan complete')
         time.sleep(5) #wait 5 seconds between each loop
 
 if __name__ == "__main__":
