@@ -1,11 +1,14 @@
 import os, shutil, psycopg2, yaml, json
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
 from enum import Enum
 
-from llama_index.core import VectorStoreIndex, StorageContext, load_index_from_storage, Settings, PromptTemplate, SimpleDirectoryReader
+from llama_index.core import VectorStoreIndex, StorageContext, PromptTemplate, SimpleDirectoryReader, load_index_from_storage, Settings
 from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.core.query_engine import RetrieverQueryEngine
+
+load_dotenv() #for testing, load envs from .env file
 
 STORAGE = os.path.join(os.getcwd(), "storage") #storage path on the machine the script runs on
 PROMPTS = yaml.safe_load(open('prompts.yaml', 'r', encoding='utf-8')) #all the prompts used
@@ -177,6 +180,6 @@ if __name__ == "__main__":
     os.environ['DB_UN'] = 'citvex'
     os.environ['DB_PW'] = 'vexrobotics'
 
-    #reset()
-    #upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
-    #query_and_write_all(get_pdfs()[0][0])
+    reset()
+    upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
+    query_and_write_all(get_pdfs()[0][0])
