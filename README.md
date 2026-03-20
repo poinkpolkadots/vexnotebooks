@@ -5,24 +5,17 @@ enviorment variables are not in this repository, but are needed to connect to th
 ## run w/ docker
 download at: https://docs.docker.com/desktop/setup/install/windows-install/
 
-### build, reset, and run containers
+### build and run containers
 ```bash
-docker-compose up --build
+docker-compose up --build -d
 docker exec -it vexnotebooks-ollama-1 ollama pull qwen2.5:7b
 docker exec -it vexnotebooks-ollama-1 ollama pull nomic-embed-text
 docker-compose exec web python -c "from util import reset; reset()"
-docker-compose up -d
 ```
-
-```docker-compose exec web python [ path ]``` run [ path ] python script
 
 ```docker-compose ps``` view status
 
 ```docker-compose logs -f [ web / worker / ollama / db ]``` view logs for a container
-
-```docker-compose restart [ web / worker / ollama / db ]``` restart a container
-
-```docker-compose stop``` shuts everything down without deleting data
 
 ```docker-compose down``` stops and removes the containers entirely
 
@@ -31,7 +24,7 @@ download ollama at: https://ollama.com/download/windows and ensure that it's run
 
 download python at: https://www.python.org/downloads/
 
-### run to install dependencies and get models
+### install dependencies and get models
 ```bash 
 pip install -r requirements.txt
 ollama pull qwen2.5:7b

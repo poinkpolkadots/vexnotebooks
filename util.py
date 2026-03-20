@@ -14,7 +14,7 @@ IN_DOCKER = os.path.exists('/.dockerenv') #using docker if docker created a env 
 
 #host, ollama, and storage change if using docker or not
 DB_HOST = 'db' if IN_DOCKER else 'drhscit.org' 
-DB_PORT = os.getenv('DB_PORT') if DB_HOST == 'drhscit.org' else 5432
+DB_PORT = int(os.getenv('DB_PORT') if DB_HOST == 'drhscit.org' else 5432)
 OLLAMA_URL = f"http://{'ollama' if IN_DOCKER else 'localhost'}:11434"
 STORAGE = "/app/storage" if IN_DOCKER else os.path.join(os.getcwd(), "storage")
 

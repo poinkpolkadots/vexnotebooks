@@ -7,6 +7,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PW}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
 
   ollama:
     image: ollama/ollama
