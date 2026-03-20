@@ -9,9 +9,13 @@
         {% for notebook in notebooks %}
         <a href="{{ url_for('notebookinfo', id=notebook[0]) }}" class="notebook-card">
             <div class="notebook-overview">
+<<<<<<< HEAD
                 <p class="notebook-name">{{ notebook[1] }}</p>
+=======
+                <p class="notebook-name">{{notebook[1]}}</p>
+>>>>>>> ee34a6dfe43e3b4d25d0e0bb23d5ba47d1d1b217
                 <div class="thumbnail-placeholder">
-                    <img class="notebook-thumbnail" src="/static/graphics/sample_thumbnail.png" alt="PDF">
+                    <img class="notebook-thumbnail" src="{{url_for('pdfthumb', id=notebook[0])}}" alt="PDF">
                 </div>
             </div>
         </a>

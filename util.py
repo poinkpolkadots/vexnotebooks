@@ -1,4 +1,4 @@
-import os, shutil, psycopg2, yaml, json
+import os, shutil, psycopg2, yaml, json, fitz, io
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from enum import Enum
@@ -10,7 +10,8 @@ from llama_index.core.query_engine import RetrieverQueryEngine
 
 load_dotenv() #for testing, load envs from .env file
 
-STORAGE = os.path.join(os.getcwd(), "storage") #storage path on the machine the script runs on
+STORAGE = "/app/storage" #storage using docker
+#STORAGE = os.path.join(os.getcwd(), "storage") #testing storage
 PROMPTS = yaml.safe_load(open('prompts.yaml', 'r', encoding='utf-8')) #all the prompts used
 
 class Task(Enum): #each task prompt, enum used for static typing
@@ -30,32 +31,24 @@ class LFW: #NOTE only for testing purposes (local file wrapper thingy)
 #reminder to pull both models `ollama pull [ model ]`
 Settings.llm = Ollama(
     model="qwen2.5:7b",
+    base_url="http://ollama:11434",
     request_timeout=3600,
     additional_kwargs={
         "temperature": 0.1,
         "num_ctx": 32768
     })
 
-llm = Ollama(model="llama3.2:3b", request_timeout=3600, # variable storing the llm to be used for PDF parsing
-            additional_kwargs={
-                "temperature": 0.1,
-                "num_ctx": 32768
-            })
-
 Settings.embed_model = OllamaEmbedding(
-    model_name="nomic-embed-text")
+    model_name="nomic-embed-text",
+    base_url="http://ollama:11434")
 
 def get_db_connection() -> psycopg2.extensions.connection: #get a connection from the database
     return psycopg2.connect(
-        #host="os.environ['DB_HOST]", # 'drhscit.org'
-        #database=os.environ['DB'],
-        #user=os.environ['DB_UN'],
-        #password=os.environ['DB_PW']
-        #TODO change back, cit servers are down
-        host="localhost",
-        database="vexpdfs",
-        user="postgres",
-        password="1q2w3e4r")
+        host=os.getenv('HOST', 'db'),
+        port=os.getenv('DB_PORT', 5432),
+        database=os.getenv('DB'), 
+        user=os.getenv('DB_UN'),
+        password=os.getenv('DB_PW'))
 
 def reset() -> None: #reset the db
     conn = get_db_connection()
@@ -67,6 +60,7 @@ def reset() -> None: #reset the db
             "name VARCHAR(255) NOT NULL," #name for the pdf
             "dir TEXT," #path to the directory
             "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP," #timestamp of when the pdf was added
+            "status TEXT CHECK(status = 'pending' OR status = 'processing' OR status = 'complete') DEFAULT 'pending'" #if the llm has generated responses yet
         ");")
     conn.commit()
     cur.close()
@@ -116,6 +110,10 @@ def get_pdf(id: int) -> str: #gets the absolute path of a pdf
     cur.close()
     conn.close()
     return os.path.abspath(os.path.join(dir, "source.pdf")) #returns the path of the source pdf
+
+def get_pdf_thumb(id: int) -> io.BytesIO: #turns the first page of the pdf into a image
+    with fitz.open(get_pdf(id)) as doc: #opens the pdf
+        return io.BytesIO(doc.load_page(0).get_pixmap(alpha=False).tobytes("png")) #gets the first page and returns a .png of it
 
 def delete_pdf(id: int) -> None: #delete a pdf
     conn = get_db_connection()
@@ -175,11 +173,8 @@ def query_and_write_all(id : int): #does all the tasks for a pdf
         set_res(id, t, query(idx, t))
         print(f'finished {t.name}')
 
-if __name__ == "__main__":
-    os.environ['DB'] = 'citvexdb'
-    os.environ['DB_UN'] = 'citvex'
-    os.environ['DB_PW'] = 'vexrobotics'
-
-    reset()
-    upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
-    query_and_write_all(get_pdfs()[0][0])
+if __name__ == "__main__": #NOTE only for testing!!
+    con = get_db_connection()
+    #reset()
+    #upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
+    #query_and_write_all(get_pdfs()[0][0])

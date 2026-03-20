@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${DB}
+      POSTGRES_USER: ${DB_UN}
+      POSTGRES_PASSWORD: ${DB_PW}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  ollama:
+    image: ollama/ollama
+    volumes:
+      - ollama_data:/root/.ollama
+
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file: .env
+    volumes:
+      - notebook_storage:/app/storage
+    depends_on:
+      - db
+      - ollama
+  
+  worker:
+    build: .
+    command: python worker.py
+    env_file: .env
+    volumes:
+      - notebook_storage:/app/storage
+    depends_on:
+      - db
+      - ollama
+
+volumes:
+  postgres_data:
+  ollama_data:
+  notebook_storage:
