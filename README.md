@@ -1,5 +1,7 @@
 site opens at http://localhost:5000 once started
 
+enviorment variables are not in this repository, but are needed to connect to the database. use a local database if credentials are unknown (note: to do so you must set ```drhscit.org``` to ```localhost``` in util.py).
+
 ## run w/ docker
 download at: https://docs.docker.com/desktop/setup/install/windows-install/
 

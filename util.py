@@ -8,12 +8,12 @@ from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.core.query_engine import RetrieverQueryEngine
 
-load_dotenv() #for testing, load envs from .env file
+load_dotenv() #load envs from .env file
 
 IN_DOCKER = os.path.exists('/.dockerenv') #using docker if docker created a env file
 
 #host, ollama, and storage change if using docker or not
-DB_HOST  = 'db' if IN_DOCKER else 'drhscit.org' #NOTE or 'localhost' if external db software is installed 
+DB_HOST  = 'db' if IN_DOCKER else 'drhscit.org' 
 OLLAMA_URL = f'http://{'ollama' if IN_DOCKER else 'localhost'}:11434'
 STORAGE = "/app/storage" if IN_DOCKER else os.path.join(os.getcwd(), "storage")
 
@@ -25,13 +25,6 @@ class Task(Enum): #each task prompt, enum used for static typing
     ITERATION = PROMPTS['tasks']['iteration']
     FLAGS = PROMPTS['tasks']['flags']
     RUBRIC = PROMPTS['tasks']['rubric']
-
-class LFW: #NOTE only for testing purposes (local file wrapper thingy)
-    def __init__(self, local_path):
-        self.local_path = local_path
-        self.filename = os.path.basename(local_path)
-    def save(self, destination):
-        shutil.copyfile(self.local_path, destination)
 
 Settings.llm = Ollama(
     model="qwen2.5:7b",
@@ -195,8 +188,15 @@ def query_and_write_all(id : int): #does all the tasks for a pdf
         set_res(id, t, query(idx, t))
         print(f'finished {t.name}')
 
-#NOTE only for testing!!
-#if __name__ == "__main__":
-    #reset()
-    #upload_pdfs(LFW(path) for path in [r"C:\Users\lawre\Downloads\Sample2-Engineering-notebook.pdf"])
-    #query_and_write_all(get_pdfs()[0][0])
+# NOTE: this was for local query testing
+# class LFW:
+#     def __init__(self, local_path):
+#         self.local_path = local_path
+#         self.filename = os.path.basename(local_path)
+#     def save(self, destination):
+#         shutil.copyfile(self.local_path, destination)
+#
+# if __name__ == "__main__":
+#     #reset()
+#     #upload_pdfs(LFW(path) for path in [r"pdf-path"])
+#     #query_and_write_all(get_pdfs()[0][0])
