@@ -1,7 +1,7 @@
 Once the site is started by running app.py, you can access it at http://localhost:5000
 
 Environment variables are not in this repository, but are needed to connect to the database. Use a local database if credentials are unknown (note: to do so you must set ```drhscit.org``` to ```localhost``` in util.py).
-If using Docker, the Docker postgresql db will automatically be used, but DB, DB_UN, and DB_PW env vars must still be set.
+If using Docker, the Docker PostGreSQL database will automatically be used, but DB, DB_UN, and DB_PW env vars must still be set.
 
 ## Run with Docker
 Must have Docker downloaded. You can download it [here](https://docs.docker.com/desktop/setup/install/windows-install/).
