@@ -6,7 +6,7 @@
 <div class="info-header">
     <p class="notebook-title">{{ name[0] }}</p>
 </div>
-<div class="dashboard-container">
+<div class="dashboard-container" markdown=1>
     {%for key, value in output.items()%}
         <div class="dashboard-box">
             <h3>{{key|capitalize}}</h3>
