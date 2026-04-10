@@ -8,7 +8,7 @@ Must have Docker downloaded. You can download it [here](https://docs.docker.com/
 
 ### Code to build and run containers
 ```bash
-docker-compose up --build -d
+docker compose up --build -d
 docker exec -it vexnotebooks-ollama-1 ollama pull qwen2.5:7b
 docker exec -it vexnotebooks-ollama-1 ollama pull nomic-embed-text
 docker-compose exec web python -c "from util import reset; reset()"
