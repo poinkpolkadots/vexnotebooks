@@ -37,3 +37,42 @@ ollama pull nomic-embed-text
 Run both ```python app.py``` and ```python worker.py``` at the same time. Ensure they are both running.
 
 *Note that the PDF data is stored along with the rest of the code. Multiple viewers will be unable to see the same PDF data since it's not being put onto a real server.*
+
+## Code Structure and Project Completion
+### Completed Items
+- Completely implemented Flask
+  - Got all routes completed
+  - Got uploading files to work
+  - Got HTML templates to work
+  - Got LLM and HTML connected
+- Styling and layout (HTML + CSS) are finished
+- Completed predetermined prompts for AI
+
+### File Structure
+| File | Description |
+-------|--------------
+| base.html | Provides base template for the catalog, home, notebookinfo, and upload |
+| catalog.html | List of all the notebooks |
+| home.html | Serves as the homepage for the upload and catalog page |
+| notebookinfo.html | Contain the responses and predetermined prompts |
+| upload.html | Uploading the PDF files into the database |
+| app.py | Runs the site itself, managing all of the html templates |
+| worker.py | Iterates through the table, creating indexes for PDFs that need them or generating responses |
+| util.py | Contains utility functions for accessing the database and running processes with the LLM |
+| prompts.yaml | Tells the model what to do to files and how to analyze them |
+| requirements.txt | A list of python dependencies that the code needs to run |
+| Dockerfile and docker-compose.yml manage the initialization of the Docker containers; there are 4 that the app runs on (the LLM runs *extremely* slow on Docker, further optimization will need to be done)|
+
+### Find default .env file in Code Documentation For Future Teams in Google Drive
+
+### Unfinished Requirements
+- Functionality of filtering entries and sorting catalog page
+- Functionality of separate completeness score
+- Section presence checklist in UI
+- Flagging entries for judges to review
+- Stretch goals
+  - Similarity detection (compare multiple notebooks to spot copy/paste issues)
+  - Writing-style consistency flag
+  - Export to CSV or Google Sheets
+- Actual separation of notebook information sections into divisions in HTML (currently just displays with markdown headings)
+- General optimization of the application, and eventual migration to client hosting
