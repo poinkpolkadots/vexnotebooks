@@ -38,8 +38,8 @@ Run both ```python app.py``` and ```python worker.py``` at the same time. Ensure
 
 *Note that the PDF data is stored along with the rest of the code. Multiple viewers will be unable to see the same PDF data since it's not being put onto a real server.*
 
-## Code Structure and Project Completion
-### Completed Items
+## Code Structure and Project Completion For Future Teams
+### Completed Requirements
 - Completely implemented Flask
   - Got all routes completed
   - Got uploading files to work
@@ -61,7 +61,7 @@ Run both ```python app.py``` and ```python worker.py``` at the same time. Ensure
 | util.py | Contains utility functions for accessing the database and running processes with the LLM |
 | prompts.yaml | Tells the model what to do to files and how to analyze them |
 | requirements.txt | A list of python dependencies that the code needs to run |
-| Dockerfile and docker-compose.yml manage the initialization of the Docker containers; there are 4 that the app runs on (the LLM runs *extremely* slow on Docker, further optimization will need to be done)|
+#### Dockerfile and docker-compose.yml manage the initialization of the Docker containers; there are 4 that the app runs on (the LLM runs *extremely* slow on Docker, further optimization will need to be done)
 
 ### Find default .env file in Code Documentation For Future Teams in Google Drive
 
